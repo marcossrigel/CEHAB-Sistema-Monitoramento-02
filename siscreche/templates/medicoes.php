@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 if (!isset($_SESSION['id_usuario'])) {
     header('Location: login.php');
     exit;
@@ -117,7 +117,8 @@ function formatarParaBrasileiro($valor) {
             <button type="button" onclick="adicionarLinha()">Adicionar Linha</button>
             <button type="button" onclick="removerLinha()">Excluir Linha</button>
             <button type="submit" name="salvar">Salvar</button>
-            <button type="button" onclick="window.location.href='visualizar.php'">Voltar</button>
+            <button type="button" onclick="window.location.href='index.php?page=visualizar';">Voltar</button>
+
         </div>
     </form>
 </div>
@@ -154,8 +155,6 @@ const newRow = table.insertRow();
 
 const primeiraLinha = table.rows[0];
 const valorOrcamentoOriginal = primeiraLinha?.cells[0]?.querySelector('input')?.value || '';
-
-// Ordem correta dos campos
 const campos = [
     { name: 'valor_orcamento[]', type: 'text', required: true, value: valorOrcamentoOriginal },
     { name: 'valor_bm[]', type: 'text', required: true },

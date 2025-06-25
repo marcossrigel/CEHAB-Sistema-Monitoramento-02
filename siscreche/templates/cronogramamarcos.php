@@ -1,9 +1,13 @@
 <?php
-
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start();
+}
+
+$tipo_usuario = $_SESSION['tipo_usuario'] ?? 'usuario';
+
 if (!isset($_SESSION['id_usuario'])) {
     header('Location: login.php');
     exit;
@@ -140,13 +144,25 @@ function formatarParaBrasileiro($valor) {
       <button type="button" onclick="addRow()">Adicionar Sub-Etapa</button>
       <button type="button" onclick="deleteRow()">Excluir Linha</button>
       <button type="submit" name="salvar" id="submit" style="background-color:rgb(42, 179, 0);">Salvar</button>
-      <button type="button" onclick="window.location.href='visualizar.php';">&lt; Voltar</button>
+      
+      <?php
+      $voltar_url = 'index.php?page=visualizar';
+      if ($tipo_usuario === 'admin' && isset($_GET['diretoria'])) {
+          $diretoria = urlencode($_GET['diretoria']);
+          $voltar_url .= "&diretoria=$diretoria";
+      }
+      ?>
+      <button type="button" onclick="window.location.href='<?php echo $voltar_url; ?>';">&lt; Voltar</button>
     </div>
   </form>
   
 </div>
 
 <script>
+
+let currentTitleIndex = 0;
+let subIndex = 1;
+
 document.querySelector('form').addEventListener('submit', function(event) {
   const form = this;
   const table = document.getElementById('spreadsheet').getElementsByTagName('tbody')[0];
@@ -157,8 +173,6 @@ document.querySelector('form').addEventListener('submit', function(event) {
   let datasInicio = [];
   let datasTermino = [];
 
-  let currentTitleIndex = 0;
-  let subIndex = 1;
 
   for (let i = 0; i < linhas.length; i++) {
     const linha = linhas[i];
@@ -196,7 +210,6 @@ document.querySelector('form').addEventListener('submit', function(event) {
       form.appendChild(inputId);
     }
 
-    // Lógica de preenchimento automático para subtítulos
     if (tipo === 'subtitulo') {
       if (tituloIndex !== -1 && datasInicio.length > 0 && datasTermino.length > 0) {
         preencherDatas(linhas[tituloIndex], datasInicio, datasTermino);
@@ -243,9 +256,8 @@ function addTitleRow() {
   const table = document.getElementById('spreadsheet').getElementsByTagName('tbody')[0];
   const newRow = table.insertRow();
 
-  currentTitleIndex++; // Novo título
-  subIndex = 1; // Reinicia subtítulos
-
+  currentTitleIndex++;
+  subIndex = 1;
   const campos = ['etapa', 'inicio_previsto', 'termino_previsto', 'inicio_real', 'termino_real', 'evolutivo'];
 
   const idCell = newRow.insertCell();

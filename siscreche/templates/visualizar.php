@@ -67,8 +67,8 @@ $resultado = $conexao->query($sql);
         <button onclick="window.location.href='index.php?page=acompanhamento&id_iniciativa=<?php echo $row['id']; ?>';">🛠 Acompanhar Pendências</button>
         <button onclick="window.location.href='infocontratuais.php?id_iniciativa=<?php echo $row['id']; ?>';">📋 Projeto e Licitação</button>
         <button onclick="window.location.href='index.php?page=info_contratuais&id_iniciativa=<?php echo $row['id']; ?>';">📄 Informações Contratuais</button>
-        <button onclick="window.location.href='medicoes.php?id_iniciativa=<?php echo $row['id']; ?>';">📊 Acompanhamento de Medições</button>
-        <button onclick="window.location.href='cronogramamarcos.php?id_iniciativa=<?php echo $row['id']; ?>';">📆 Eventograma</button>
+        <button onclick="window.location.href='index.php?page=medicoes&id_iniciativa=<?php echo $row['id']; ?>';">📊 Acompanhamento de Medições</button>
+        <button onclick="window.location.href='index.php?page=cronogramamarcos&id_iniciativa=<?php echo $row['id']; ?>';">📆 Eventograma</button>
       </div>
     </div>
   <?php endwhile; ?>

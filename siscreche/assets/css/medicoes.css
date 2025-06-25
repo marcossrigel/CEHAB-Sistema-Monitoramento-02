@@ -1,0 +1,53 @@
+body { font-family: Arial; background: #f1f1f1; }
+.container {
+    max-width: 75%;
+    margin: auto;
+    padding: 20px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 0 10px #ccc;
+}
+h2 { text-align: center; }
+.table-wrapper {
+    overflow-x: auto;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    min-width: unset;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+input[type="text"], input[type="date"] {
+    width: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+}
+input[name="numero_processo_sei[]"] {
+    min-width: 180px;
+}
+input[name="valor_orcamento[]"],
+input[name="valor_bm[]"],
+input[name="saldo_obra[]"] {
+    min-width: 150px;
+}
+.buttons {
+    text-align: center;
+    margin-top: 10px;
+}
+.buttons button {
+    padding: 10px 20px;
+    margin: 5px;
+    border: none;
+    background: #3399ff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.buttons button:hover {
+    background: #237acc;
+}

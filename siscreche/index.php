@@ -34,6 +34,9 @@ $page = $_GET['page'] ?? 'home';
     elseif ($page === 'info_contratuais') {
       echo '<link rel="stylesheet" href="assets/css/info_contratuais.css">';
     }
+    elseif ($page === 'medicoes') {
+      echo '<link rel="stylesheet" href="assets/css/medicoes.css">';
+    }
     elseif ($page === 'cronogramamarcos') {
       echo '<link rel="stylesheet" href="assets/css/cronogramamarcos.css">';
     }
@@ -60,6 +63,12 @@ $page = $_GET['page'] ?? 'home';
       }
       elseif ($page === 'info_contratuais') {
         include_once 'templates/info_contratuais.php';
+      }
+      elseif ($page === 'medicoes') {
+        include_once 'templates/medicoes.php';
+      }
+      elseif ($page === 'cronogramamarcos') {
+        include_once 'templates/cronogramamarcos.php';
       }
       else {
         echo "<p style='text-align:center;'>Página não encontrada.</p>";

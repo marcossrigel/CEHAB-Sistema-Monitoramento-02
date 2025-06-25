@@ -18,7 +18,6 @@ if (mysqli_num_rows($result) == 1) {
     $_SESSION['nome'] = $usuario['nome'];
     $_SESSION['tipo_usuario'] = $usuario['tipo'];
 
-    // Redireciona tudo para index.php com a page apropriada
     if ($usuario['tipo'] === 'admin') {
         header('Location: index.php?page=visualizar');
     } else {
