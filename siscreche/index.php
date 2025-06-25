@@ -21,6 +21,9 @@ $page = $_GET['page'] ?? 'home';
     } 
     elseif ($page === 'visualizar') {
       echo '<link rel="stylesheet" href="assets/css/visualizar.css">';
+    }
+    elseif ($page === 'diretorias') {
+      echo '<link rel="stylesheet" href="assets/css/diretorias.css">';
     } 
     elseif ($page === 'formulario') {
       echo '<link rel="stylesheet" href="assets/css/formulario.css">';
@@ -54,6 +57,9 @@ $page = $_GET['page'] ?? 'home';
       }
       elseif ($page === 'visualizar') {
         include_once 'templates/visualizar.php';
+      }
+      elseif ($page === 'diretorias') {
+        include_once 'templates/diretorias.php';
       }
       elseif ($page === 'editar_iniciativa') {
         include_once 'templates/editar_iniciativa.php';
