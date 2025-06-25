@@ -18,15 +18,27 @@ $page = $_GET['page'] ?? 'home';
   <?php
     if ($page === 'home') {
       echo '<link rel="stylesheet" href="assets/css/home.css">';
-    } elseif ($page === 'visualizar') {
+    } 
+    elseif ($page === 'visualizar') {
       echo '<link rel="stylesheet" href="assets/css/visualizar.css">';
-    } elseif ($page === 'formulario') {
+    } 
+    elseif ($page === 'formulario') {
       echo '<link rel="stylesheet" href="assets/css/formulario.css">';
-    } elseif ($page === 'editar_iniciativa') {
+    } 
+    elseif ($page === 'editar_iniciativa') {
       echo '<link rel="stylesheet" href="assets/css/editar_iniciativa.css">';
+    } 
+    elseif ($page === 'acompanhamento') {
+      echo '<link rel="stylesheet" href="assets/css/acompanhamento.css">';
+    } 
+    elseif ($page === 'info_contratuais') {
+      echo '<link rel="stylesheet" href="assets/css/info_contratuais.css">';
     }
-
+    elseif ($page === 'cronogramamarcos') {
+      echo '<link rel="stylesheet" href="assets/css/cronogramamarcos.css">';
+    }
   ?>
+
 </head>
 <body style="height: 100vh; display: flex; flex-direction: column;">
   <main>
@@ -42,6 +54,12 @@ $page = $_GET['page'] ?? 'home';
       }
       elseif ($page === 'editar_iniciativa') {
         include_once 'templates/editar_iniciativa.php';
+      }
+      elseif ($page === 'acompanhamento') {
+        include_once 'templates/acompanhamento.php';
+      }
+      elseif ($page === 'info_contratuais') {
+        include_once 'templates/info_contratuais.php';
       }
       else {
         echo "<p style='text-align:center;'>Página não encontrada.</p>";

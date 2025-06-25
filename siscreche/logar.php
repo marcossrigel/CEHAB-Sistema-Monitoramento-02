@@ -16,15 +16,15 @@ if (mysqli_num_rows($result) == 1) {
 
     $_SESSION['id_usuario'] = $usuario['id_usuario'];
     $_SESSION['nome'] = $usuario['nome'];
-    $_SESSION['tipo_usuario'] = $usuario['tipo']; // ✅ nome agora compatível
+    $_SESSION['tipo_usuario'] = $usuario['tipo'];
 
+    // Redireciona tudo para index.php com a page apropriada
     if ($usuario['tipo'] === 'admin') {
-        header('Location: diretorias.php');
+        header('Location: index.php?page=visualizar');
     } else {
-        header('Location: home.php');
+        header('Location: index.php?page=home');
     }
     exit;
 } else {
     echo "<script>alert('Erro: Usuário ou Senha inválidos'); window.location.href = 'login.php';</script>";
 }
-?>

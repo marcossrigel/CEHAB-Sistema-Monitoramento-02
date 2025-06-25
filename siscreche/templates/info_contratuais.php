@@ -4,7 +4,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-session_start();
 if (!isset($_SESSION['id_usuario'])) {
     header('Location: login.php');
     exit;
@@ -119,115 +118,6 @@ if (isset($_POST['salvar'])) {
 }
 
 ?>
-
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Informações Contratuais</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --color-white: #ffffff;
-      --color-gray: #e3e8ec;
-      --color-dark: #1d2129;
-      --color-blue: #4da6ff;
-    }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Poppins', sans-serif;
-      background-color: var(--color-gray);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 30px 10px;
-    }
-    .container {
-      background: var(--color-white);
-      padding: 30px 20px;
-      border-radius: 15px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 900px;
-    }
-    .main-title {
-      font-size: 24px;
-      font-weight: 500;
-      color: #2c2c2c;
-      text-align: center;
-      margin-bottom: 30px;
-      padding: 0 10px;
-    }
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0 10px;
-    }
-    th, td {
-      text-align: left;
-      padding: 8px;
-    }
-    .hide-mobile {
-      display: table-cell;
-    }
-    input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 15px;
-    }
-    .button-group {
-      margin-top: 30px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 15px;
-    }
-    button {
-      padding: 12px 20px;
-      background-color: var(--color-blue);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    button:hover {
-      background-color: #3399ff;
-    }
-    @media (max-width: 600px) {
-      .main-title {
-        font-size: 20px;
-      }
-      input {
-        font-size: 14px;
-      }
-      table th.hide-mobile {
-        display: none;
-      }
-      table td {
-        display: block;
-        width: 100%;
-      }
-      table tr {
-        display: block;
-        margin-bottom: 15px;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 10px;
-      }
-    }
-  </style>
-</head>
-
-<body>
   <div class="container">
     <form method="post" action="infocontratuais.php">
       <input type="hidden" name="id_iniciativa" value="<?php echo $id_iniciativa; ?>">
@@ -253,7 +143,7 @@ if (isset($_POST['salvar'])) {
       </table>
       <div class="button-group">
         <button type="submit" name="salvar" style="background-color:rgb(42, 179, 0);">Salvar</button>
-        <button type="button" onclick="window.location.href='visualizar.php';">&lt; Voltar</button>
+        <button type="button" onclick="window.location.href='index.php?page=visualizar';">&lt; Voltar</button>
       </div>
     </form>
   </div>

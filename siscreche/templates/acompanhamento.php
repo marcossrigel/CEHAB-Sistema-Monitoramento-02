@@ -4,7 +4,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-session_start();
 if (!isset($_SESSION['id_usuario'])) {
   header('Location: login.php');
   exit;
@@ -59,135 +58,10 @@ $linha_nome = mysqli_fetch_assoc($resultado_nome);
 $nome_iniciativa = $linha_nome['iniciativa'] ?? 'Iniciativa Desconhecida';
 ?>
 
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Planilha Web</title>
-  
-  <style>
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: #e3e8ec;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    min-height: 100vh;
-    margin: 0;
-    padding: 10px;
-  }
-
-  .table-container {
-    background: #fff;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    width: 100%;
-    max-width: 1000px;
-    overflow-x: auto;
-  }
-
-  .main-title {
-    font-size: 26px;
-    text-align: center;
-    margin-bottom: 20px;
-    word-break: break-word;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 12px 15px;
-  }
-
-  th {
-    text-align: left;
-    padding: 10px;
-  }
-
-  td {
-    padding: 10px;
-    word-break: break-word;
-  }
-
-  td[contenteditable], td.readonly {
-    border: 1px solid #ccc;
-    border-radius: 12px;
-    background-color: #fff;
-    padding: 10px;
-    min-width: 120px;
-  }
-
-  td.readonly {
-    background-color: #f9f9f9;
-    color: #555;
-    cursor: not-allowed;
-  }
-
-  td[contenteditable]:focus {
-    outline: none;
-    border: 1px solid #4da6ff;
-    background-color: #f0f8ff;
-  }
-
-  .button-group {
-    margin-top: 20px;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 10px;
-  }
-
-  .button-group button {
-    padding: 10px 20px;
-    background-color: #4da6ff;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-  }
-
-  .button-group button:hover {
-    background-color: #3399ff;
-  }
-
-  #submit {
-    background-color: #28a745;
-  }
-
-  @media (max-width: 768px) {
-    .main-title {
-      font-size: 20px;
-    }
-
-    table {
-      font-size: 13px;
-    }
-
-    td[contenteditable], td.readonly {
-      min-width: 90px;
-      font-size: 13px;
-      padding: 8px;
-    }
-
-    .button-group button {
-      flex: 1 1 100%;
-      padding: 12px;
-      font-size: 14px;
-    }
-  }
-  </style>
-
-</head>
-<body>
-
 <div class="table-container">
   <div class="main-title"><?php echo htmlspecialchars($nome_iniciativa); ?> - Acompanhamento de Pendências</div>
 
-  <form method="post" action="acompanhamento.php?id_iniciativa=<?php echo $id_iniciativa; ?>">
+  <form method="post" action="index.php?page=acompanhamento&id_iniciativa=<?php echo $id_iniciativa; ?>">
     <table id="spreadsheet">
       <thead>
         <tr>
@@ -228,7 +102,8 @@ $nome_iniciativa = $linha_nome['iniciativa'] ?? 'Iniciativa Desconhecida';
       <button type="button" onclick="addRow()">Adicionar Linha</button>
       <button type="button" onclick="deleteRow()">Excluir Linha</button>
       <button type="submit" name="salvar" id="submit">Salvar</button>
-      <button type="button" onclick="window.location.href='visualizar.php';">&lt; Voltar</button>
+      <button type="button" onclick="window.location.href='index.php?page=visualizar';">&lt; Voltar</button>
+      
     </div>
   </form>
 </div>
@@ -316,5 +191,3 @@ function deleteRow() {
 }
 </script>
 
-</body>
-</html>
