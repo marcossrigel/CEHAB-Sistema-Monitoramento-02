@@ -27,6 +27,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ib_status = $_POST['ib_status'];
     $data_vistoria = $_POST['data_vistoria'];
     $numero_contrato = $_POST['numero_contrato'];
+    
+    $ib_secretaria = $_POST['ib_secretaria'];
+    $ib_orgao = $_POST['ib_orgao'];
+    $ib_numero_processo_sei = $_POST['ib_numero_processo_sei'];
+    $ib_gestor_responsavel = $_POST['ib_gestor_responsavel'];
+    $ib_fiscal = $_POST['ib_fiscal'];
+
     $ib_execucao = $_POST['ib_execucao'];
     $ib_previsto = $_POST['ib_previsto'];
     $ib_variacao = $_POST['ib_variacao'];
@@ -36,18 +43,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $observacoes = $_POST['observacoes'];
 
     $update = "UPDATE iniciativas SET 
-      iniciativa = '$iniciativa',
-      numero_contrato = '$numero_contrato',
-      ib_status = '$ib_status',
-      data_vistoria = '$data_vistoria',
-      ib_execucao = '$ib_execucao',
-      ib_previsto = '$ib_previsto',
-      ib_variacao = '$ib_variacao',
-      ib_valor_medio = '$ib_valor_medio',
-      objeto = '$objeto',
-      informacoes_gerais = '$informacoes_gerais',
-      observacoes = '$observacoes'
-    WHERE id = $id";
+    iniciativa = '$iniciativa',
+    numero_contrato = '$numero_contrato',
+    ib_status = '$ib_status',
+    data_vistoria = '$data_vistoria',
+    ib_execucao = '$ib_execucao',
+    ib_previsto = '$ib_previsto',
+    ib_variacao = '$ib_variacao',
+    ib_valor_medio = '$ib_valor_medio',
+    ib_secretaria = '$ib_secretaria',
+    ib_orgao = '$ib_orgao',
+    ib_numero_processo_sei = '$ib_numero_processo_sei',
+    ib_gestor_responsavel = '$ib_gestor_responsavel',
+    ib_fiscal = '$ib_fiscal',
+    objeto = '$objeto',
+    informacoes_gerais = '$informacoes_gerais',
+    observacoes = '$observacoes'
+  WHERE id = $id";
 
     if ($conexao->query($update)) {
         header("Location: index.php?page=visualizar");
@@ -106,26 +118,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
       <div class="campo">
         <label>Secretaria:</label>
-        <input type="text" name="ib_secretaria" value="<?php echo htmlspecialchars($row['ib_secretaria']); ?>" readonly>
+        <input type="text" name="ib_secretaria" value="<?php echo htmlspecialchars($row['ib_secretaria']); ?>">
       </div>
       <div class="campo">
         <label>Órgão:</label>
-        <input type="text" name="ib_orgao" value="<?php echo htmlspecialchars($row['ib_orgao']); ?>" readonly>
+        <input type="text" name="ib_orgao" value="<?php echo htmlspecialchars($row['ib_orgao']); ?>">
       </div>
     </div>
 
     <div class="linha">
       <div class="campo">
         <label>Processo SEI:</label>
-        <input type="text" name="ib_numero_processo_sei" value="<?php echo htmlspecialchars($row['ib_numero_processo_sei']); ?>" readonly>
+        <input type="text" name="ib_numero_processo_sei" value="<?php echo htmlspecialchars($row['ib_numero_processo_sei']); ?>" >
       </div>
       <div class="campo">
         <label>Gestor Responsável:</label>
-        <input type="text" name="ib_gestor_responsavel" value="<?php echo htmlspecialchars($row['ib_gestor_responsavel']); ?>" readonly>
+        <input type="text" name="ib_gestor_responsavel" value="<?php echo htmlspecialchars($row['ib_gestor_responsavel']); ?>">
       </div>
       <div class="campo">
         <label>Fiscal Responsável:</label>
-        <input type="text" name="ib_fiscal" value="<?php echo htmlspecialchars($row['ib_fiscal']); ?>" readonly>
+        <input type="text" name="ib_fiscal" value="<?php echo htmlspecialchars($row['ib_fiscal']); ?>">
       </div>
     </div>
 

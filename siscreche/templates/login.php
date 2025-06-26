@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Monitoramento Creches</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/login.css">
+  <link rel="stylesheet" href="/CEHAB-Sistema-Monitoramento/siscreche/assets/css/login.css">
+
 </head>
 
 <body>
@@ -23,7 +24,7 @@
       </form>
     </div>
 
-    <img src="logo.png" alt="Logo" width="160px" style="margin-top: 40px;">
+    <img src="/CEHAB-Sistema-Monitoramento/siscreche/img/logo.png" alt="Logo" width="160px" style="margin-top: 40px;">
   </div>
 </body>
 </html>

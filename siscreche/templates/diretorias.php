@@ -7,15 +7,15 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
 ?>
 <div class="cards-container">
 
-  <a href="visualizar.php?diretoria=Educacao" class="card-link">
+  <a href="index.php?page=visualizar&diretoria=Educacao" class="card-link">
     <div class="card-conteudo">Educação</div>
   </a>
 
-  <a href="visualizar.php?diretoria=Saude" class="card-link">
+  <a href="index.php?page=visualizar&diretoria=Saude" class="card-link">
     <div class="card-conteudo">Saúde</div>
   </a>
 
-  <a href="visualizar.php?diretoria=Infra Estratégicas" class="card-link">
+  <a href="index.php?page=visualizar&diretoria=Infra Estrategicas" class="card-link">
     <div class="card-conteudo">
       <div class="card-titulo">
         <div>Infra</div>
@@ -24,7 +24,7 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
     </div>
   </a>
 
-  <a href="visualizar.php?diretoria=Infra Grandes Obras" class="card-link">
+  <a href="index.php?page=visualizar&diretoria=Infra Grandes Obras" class="card-link">
     <div class="card-conteudo">
       <div class="card-titulo">
         <div>Infra</div>
@@ -33,16 +33,17 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
     </div>
   </a>
 
-  <a href="visualizar.php?diretoria=Seguranca" class="card-link">
+  <a href="index.php?page=visualizar&diretoria=Seguranca" class="card-link">
     <div class="card-conteudo">Segurança</div>
   </a>
 
-  <a href="visualizar.php?diretoria=Social" class="card-link">
+  <a href="index.php?page=visualizar&diretoria=Social" class="card-link">
     <div class="card-conteudo">Social</div>
   </a>
 
 </div>
 
 <div class="botao-sair">
-  <a href="login.php">Sair</a>
+  <a href="templates/login.php">Sair</a>
 </div>
+

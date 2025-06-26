@@ -74,10 +74,10 @@ $resultado = $conexao->query($sql);
   <?php endwhile; ?>
   
   <div class="botao-voltar">
-    <button onclick="window.location.href='<?php echo $tipo_usuario === "admin" ? "diretorias.php" : "index.php"; ?>';">
-      &lt; Voltar
-    </button>
+    <button onclick="window.location.href='<?php echo $tipo_usuario === "admin" ? "index.php?page=diretorias" : "index.php?page=home"; ?>';">&lt; Voltar</button>
   </div>
+
+
 </div>
 
 <script src="js/visualizar.js"></script>

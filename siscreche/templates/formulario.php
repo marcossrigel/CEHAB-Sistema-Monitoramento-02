@@ -223,23 +223,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_GET['page'] ?? '') === 'formular
   </form>
 </div>
 
-  <?php
-    $mensagem = '';
-    if (isset($_GET['sucesso']) && $_GET['sucesso'] == 1 && isset($_GET['nome'])) {
-        $mensagem = 'Iniciativa "' . htmlspecialchars($_GET['nome']) . '" criada com sucesso!';
-    }
-  ?>
-
-  <div id="modal-cancelar" class="modal hidden">
-    <div class="modal-content">
-      <p>Você deseja cancelar? Os dados preenchidos podem ser perdidos.</p>
-      <button id="btn-sim" style="background-color: #dc3545;">Sim</button>
-      <button id="btn-nao" style="background-color: #6c757d; margin-left: 10px;">Não</button>
-    </div>
+<?php
+  $mensagem = '';
+  if (isset($_GET['sucesso']) && $_GET['sucesso'] == 1 && isset($_GET['nome'])) {
+      $mensagem = 'Iniciativa "' . htmlspecialchars($_GET['nome']) . '" criada com sucesso!';
+  }
+?>
+<div id="modal-cancelar" class="modal hidden">
+  <div class="modal-content">
+    <p>Você deseja cancelar? Os dados preenchidos podem ser perdidos.</p>
+    <button id="btn-sim" style="background-color: #dc3545;">Sim</button>
+    <button id="btn-nao" style="background-color: #6c757d; margin-left: 10px;">Não</button>
   </div>
+</div>
 
-</body>
+<div id="modal" class="modal hidden" data-mensagem="<?php echo $mensagem; ?>">
+  <div class="modal-content">
+    <p id="modal-message"></p>
+    <button onclick="closeModal()">Fechar</button>
+  </div>
+</div>
 
 <script src="js/formulario.js"></script>
-
+</body>
 </html>

@@ -19,9 +19,9 @@ if (mysqli_num_rows($result) == 1) {
     $_SESSION['tipo_usuario'] = $usuario['tipo'];
 
     if ($usuario['tipo'] === 'admin') {
-        header('Location: index.php?page=diretorias');
+    header('Location: /CEHAB-Sistema-Monitoramento/siscreche/index.php?page=diretorias');
     } else {
-        header('Location: index.php?page=visualizar');
+        header('Location: /CEHAB-Sistema-Monitoramento/siscreche/index.php?page=home');
     }
     exit;
 } else {

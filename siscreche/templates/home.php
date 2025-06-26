@@ -9,7 +9,7 @@
     <div class="button-group">
       <a href="index.php?page=formulario" class="btn">Criar Iniciativa</a>
       <a href="index.php?page=visualizar" class="btn btn-secondary">Minhas Vistorias</a>
-      <a href="login.php" class="texto-login">Sair</a>
+      <a href="templates/login.php" class="texto-login">Sair</a>
     </div>
   </div>
 
