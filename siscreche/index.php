@@ -81,5 +81,6 @@ $page = $_GET['page'] ?? 'home';
       }
     ?>
   </main>
+  
 </body>
 </html>

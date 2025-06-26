@@ -18,14 +18,12 @@ if (!isset($_GET['id'])) {
 
 $id = intval($_GET['id']);
 
-// Verifica se a iniciativa existe
 $check = $conexao->query("SELECT * FROM iniciativas WHERE id = $id") or die("Erro ao buscar iniciativa: " . $conexao->error);
 if ($check->num_rows == 0) {
     header("Location: visualizar.php");
     exit;
 }
 
-// Exclui registros relacionados nas tabelas dependentes
 $queries = [
     "DELETE FROM medicoes WHERE id_iniciativa = $id",
     "DELETE FROM pendencias WHERE id_iniciativa = $id",
@@ -39,7 +37,6 @@ foreach ($queries as $sql) {
     }
 }
 
-// Agora exclui a própria iniciativa
 if ($conexao->query("DELETE FROM iniciativas WHERE id = $id")) {
     header("Location: visualizar.php");
     exit;

@@ -116,8 +116,8 @@ if (isset($_POST['salvar'])) {
     header("Location: infocontratuais.php?id_iniciativa=$id_iniciativa");
     exit;
 }
-
 ?>
+
   <div class="container">
     <form method="post" action="infocontratuais.php">
       <input type="hidden" name="id_iniciativa" value="<?php echo $id_iniciativa; ?>">
@@ -147,8 +147,3 @@ if (isset($_POST['salvar'])) {
       </div>
     </form>
   </div>
-<script>
-
-</script>
-</body>
-</html>
