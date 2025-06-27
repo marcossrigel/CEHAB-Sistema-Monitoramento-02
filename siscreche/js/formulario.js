@@ -40,7 +40,7 @@
   }
 
 document.getElementById('btn-sim').addEventListener('click', function() {
-  window.location.href = 'index.php';
+    window.location.href = 'index.php?page=home';
 });
 
 document.getElementById('btn-nao').addEventListener('click', function() {

@@ -232,7 +232,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_GET['page'] ?? '') === 'formular
 <div id="modal-cancelar" class="modal hidden">
   <div class="modal-content">
     <p>Você deseja cancelar? Os dados preenchidos podem ser perdidos.</p>
-    <button id="btn-sim" style="background-color: #dc3545;">Sim</button>
+    <button id="btn-sim" type="button" style="background-color: #dc3545;">Sim</button>
     <button id="btn-nao" style="background-color: #6c757d; margin-left: 10px;">Não</button>
   </div>
 </div>

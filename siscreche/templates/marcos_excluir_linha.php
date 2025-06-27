@@ -1,15 +1,15 @@
 <?php
 session_start();
-include_once('config.php');
+include_once("config.php");
 
 if (!isset($_SESSION['id_usuario'])) {
-    http_response_code(403);
-    echo "Acesso negado";
+    http_response_code(401);
+    echo "Usuário não autenticado.";
     exit;
 }
 
 $id_usuario = $_SESSION['id_usuario'];
-$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+$id = (int) ($_GET['id'] ?? 0);
 
 if ($id > 0) {
     $query = "DELETE FROM marcos WHERE id = $id AND id_usuario = $id_usuario";
@@ -17,7 +17,7 @@ if ($id > 0) {
         echo "Linha excluída com sucesso.";
     } else {
         http_response_code(500);
-        echo "Erro ao excluir linha: " . mysqli_error($conexao);
+        echo "Erro ao excluir: " . mysqli_error($conexao);
     }
 } else {
     http_response_code(400);
