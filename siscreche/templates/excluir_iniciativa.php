@@ -20,7 +20,7 @@ $id = intval($_GET['id']);
 
 $check = $conexao->query("SELECT * FROM iniciativas WHERE id = $id") or die("Erro ao buscar iniciativa: " . $conexao->error);
 if ($check->num_rows == 0) {
-    header("Location: visualizar.php");
+    header("Location: ../index.php?page=visualizar");
     exit;
 }
 
@@ -38,7 +38,7 @@ foreach ($queries as $sql) {
 }
 
 if ($conexao->query("DELETE FROM iniciativas WHERE id = $id")) {
-    header("Location: visualizar.php");
+    header("Location: ../index.php?page=visualizar");
     exit;
 } else {
     die("Erro ao excluir iniciativa: " . $conexao->error);

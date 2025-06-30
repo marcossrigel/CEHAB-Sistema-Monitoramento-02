@@ -18,7 +18,7 @@ $page = $_GET['page'] ?? 'home';
   <?php
     if ($page === 'home') {
       echo '<link rel="stylesheet" href="assets/css/home.css">';
-    } 
+    }
     elseif ($page === 'visualizar') {
       echo '<link rel="stylesheet" href="assets/css/visualizar.css">';
     }
@@ -39,9 +39,6 @@ $page = $_GET['page'] ?? 'home';
     }
     elseif ($page === 'medicoes') {
       echo '<link rel="stylesheet" href="assets/css/medicoes.css">';
-    }
-    elseif ($page === 'cronogramamarcos') {
-      echo '<link rel="stylesheet" href="assets/css/cronogramamarcos.css">';
     }
   ?>
 

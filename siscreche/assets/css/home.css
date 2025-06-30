@@ -6,6 +6,7 @@
   --color-green-hover: #36a420;
   --color-gray-dark: #6c757d;
   --color-gray-hover: #5a6268;
+  --color-danger: red;
 }
 
 * {
@@ -18,15 +19,14 @@ body {
   background-color: var(--color-gray);
   font-family: 'Poppins', sans-serif;
   margin: 0;
-  padding: 0;
+  padding: 40px 0;
   display: flex;
   justify-content: center;
-  align-items: center;
   min-height: 100vh;
 }
 
 .container {
-  width: 90%;
+  width: 100%;
   max-width: 1200px;
   background-color: var(--color-white);
   padding: 40px;
@@ -39,8 +39,8 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
   flex-wrap: wrap;
+  margin-bottom: 30px;
 }
 
 .header-text {
@@ -63,26 +63,24 @@ body {
 .button-group {
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   gap: 10px;
   min-width: 200px;
-  align-items: flex-end;
 }
 
 .btn {
   background-color: var(--color-green);
   color: var(--color-white);
-  text-decoration: none;
   padding: 14px 20px;
   border-radius: 8px;
   font-size: 16px;
   font-weight: 600;
+  text-decoration: none;
   text-align: center;
   transition: background 0.3s;
   width: 200px;
-  display: inline-block; 
-  border: none;          
-  outline: none;
-  cursor: pointer; 
+  cursor: pointer;
+  border: none;
 }
 
 .btn:hover {
@@ -97,13 +95,13 @@ body {
   background-color: var(--color-gray-hover);
 }
 
-.btn-sair {
-  text-align: center;
-  display: inline-block;
-  color: var(--color-blue);
-  display: inline-block;
+.texto-login {
+  color: var(--color-danger);
+  text-decoration: none;
+  font-weight: bold;
   font-size: 14px;
-  margin-top: 20px auto;
+  margin-top: 10px;
+  text-align: center;
   display: block;
 }
 
@@ -126,89 +124,46 @@ body {
   color: var(--color-dark);
 }
 
-.accordion-content {
-  margin-top: 15px;
-  text-align: left;
-  color: #555;
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 200px;
+  align-items: center;
+}
+
+a.texto-login {
+  color: red;
+  text-decoration: none;
+  font-weight: bold;
   font-size: 14px;
-}
-
-.hidden {
-  display: none;
-}
-
-.hidden {
-  display: none;
-}
-
-.button-group a.texto-login {
-  align-self: center;
   margin-top: 10px;
 }
 
-.texto-login {
-  text-align: center;
-  display: inline-block;
-  color: var(--color-blue);
-  display: inline-block;
+.accordion-content {
+  margin-top: 15px;
+  color: #555;
   font-size: 14px;
-  margin-top: 20px auto;
-  display: block;
+  text-align: left;
 }
 
-a.texto-login{
-  color: red;               
-  text-decoration: none;  
-  font-weight: bold;
+.hidden {
+  display: none;
 }
 
-a.texto-login:hover {
-  text-decoration: none;
-}
-
-@media (max-width: 600px) {
-  body {
-    padding: 20px;
-    align-items: flex-start;
-  }
-
-  .container {
-    padding: 20px;
-  }
-
+@media (max-width: 768px) {
   .header {
     flex-direction: column;
     align-items: flex-start;
     gap: 20px;
   }
 
-  .header-text h1 {
-    font-size: 22px;
-  }
-
-  .header-text p {
-    font-size: 14px;
-  }
-
   .button-group {
     width: 100%;
-    align-items: center;
+    align-items: stretch;
   }
 
   .btn {
     width: 100%;
-    font-size: 15px;
-  }
-
-  .accordion-header h2 {
-    font-size: 16px;
-  }
-
-  .accordion-content {
-    font-size: 13px;
-  }
-
-  .texto-login {
-    font-size: 13px;
   }
 }

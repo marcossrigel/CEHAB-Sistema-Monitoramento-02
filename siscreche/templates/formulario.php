@@ -46,11 +46,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_GET['page'] ?? '') === 'formular
 ?>
 
 <div class="pagina-formulario">
-<link rel="stylesheet" href="assets/css/formulario.css">
 
 <form class="formulario" action="index.php?page=formulario" method="post">
     <h1 class="main-title">Criar uma nova iniciativa</h1>
-
     <div class="linha">
       
       <div class="campo-pequeno">
@@ -237,7 +235,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_GET['page'] ?? '') === 'formular
   </div>
 </div>
 
-<div id="modal" class="modal hidden" data-mensagem="<?php echo $mensagem; ?>">
+<div id="modal" class="modal hidden" data-mensagem="<?php echo $mensagem; ?>" aria-modal="true" role="dialog">
   <div class="modal-content">
     <p id="modal-message"></p>
     <button onclick="closeModal()">Fechar</button>

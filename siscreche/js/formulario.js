@@ -47,11 +47,11 @@ document.getElementById('btn-nao').addEventListener('click', function() {
   document.getElementById('modal-cancelar').classList.add('hidden');
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const modal = document.getElementById('modal');
   const mensagem = modal.getAttribute('data-mensagem');
 
-  if (mensagem) {
+  if (mensagem && mensagem.trim() !== '') {
     showModal(mensagem);
   }
 });

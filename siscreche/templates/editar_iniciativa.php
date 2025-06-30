@@ -173,4 +173,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </div>
 </div>
 
+<script>
+  const idIniciativa = <?php echo $row['id']; ?>;
+</script>
 <script src="js/editar_iniciativa.js"></script>
+
+
