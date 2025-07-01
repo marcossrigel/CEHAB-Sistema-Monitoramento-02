@@ -276,7 +276,7 @@ textarea {
           $voltar_url .= "&diretoria=$diretoria";
       }
       ?>
-      <button type="button" onclick="window.location.href='<?php echo $voltar_url; ?>';">&lt; Voltar</button>
+      <button type="button" onclick="window.location.href='index.php?page=visualizar';">&lt; Voltar</button>
       <div style="margin-top: 10px;">
         <input type="text" id="idExcluir" placeholder="ID para excluir (ex: 3.1)" style="padding: 5px; width: 160px;">
         <button type="button" onclick="excluirLinhaPorId()">Excluir Linha Específica</button>

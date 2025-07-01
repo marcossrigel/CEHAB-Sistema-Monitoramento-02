@@ -1,6 +1,6 @@
 <?php
 session_start();
-include_once('config.php');
+include_once('templates/config.php');
 
 $login = $_POST['nome'];
 $senha = $_POST['senha'];

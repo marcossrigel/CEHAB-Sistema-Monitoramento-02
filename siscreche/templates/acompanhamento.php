@@ -103,7 +103,6 @@ $nome_iniciativa = $linha_nome['iniciativa'] ?? 'Iniciativa Desconhecida';
       <button type="button" onclick="deleteRow()">Excluir Linha</button>
       <button type="submit" name="salvar" id="submit">Salvar</button>
       <button type="button" onclick="window.location.href='index.php?page=visualizar';">&lt; Voltar</button>
-      
     </div>
   </form>
 </div>

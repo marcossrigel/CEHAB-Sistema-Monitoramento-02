@@ -4,6 +4,7 @@ if (!isset($_SESSION['id_usuario'])) {
     header('Location: login.php');
     exit;
 }
+
 $page = $_GET['page'] ?? 'home';
 ?>
 

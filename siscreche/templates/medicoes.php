@@ -117,8 +117,7 @@ function formatarParaBrasileiro($valor) {
             <button type="button" onclick="adicionarLinha()">Adicionar Linha</button>
             <button type="button" onclick="removerLinha()">Excluir Linha</button>
             <button type="submit" name="salvar">Salvar</button>
-            <button type="button" onclick="window.location.href='index.php?page=visualizar';">Voltar</button>
-
+            <button type="button" onclick="window.location.href='index.php?page=visualizar';">&lt; Voltar</button>
         </div>
     </form>
 </div>
