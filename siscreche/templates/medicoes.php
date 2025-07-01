@@ -36,20 +36,20 @@ if (isset($_POST['salvar'])) {
         $orc = limparDinheiro($valor_orcamento[$i]);
         $bm_valor = limparDinheiro($valor_bm[$i]);
         $saldo = limparDinheiro($saldo_obra[$i]);
-        $bm_ind = intval(limparDinheiro($bm[$i]));
+        $bm_ind = mysqli_real_escape_string($conexao, $bm[$i] ?? '');
         $sei = mysqli_real_escape_string($conexao, $numero_processo_sei[$i] ?? '');
-        $inicio = $data_inicio[$i] ?? null;
-        $fim = $data_fim[$i] ?? null;
+        $inicio = !empty($data_inicio[$i]) ? "'{$data_inicio[$i]}'" : "NULL";
+        $fim = !empty($data_fim[$i]) ? "'{$data_fim[$i]}'" : "NULL";
         $registro = date('Y-m-d H:i:s');
 
         if ($id_existente > 0) {
             $sql = "UPDATE medicoes 
         SET valor_orcamento='$orc', valor_bm='$bm_valor', saldo_obra='$saldo', bm='$bm_ind', 
-            data_inicio='$inicio', data_fim='$fim', numero_processo_sei='$sei' 
+            data_inicio=$inicio, data_fim=$fim, numero_processo_sei='$sei' 
         WHERE id=$id_existente AND id_usuario=$id_usuario";
         } else {
             $sql = "INSERT INTO medicoes (id_usuario, id_iniciativa, valor_orcamento, valor_bm, saldo_obra, bm, data_inicio, data_fim, data_registro, numero_processo_sei)
-        VALUES ($id_usuario, $id_iniciativa, '$orc', '$bm_valor', '$saldo', '$bm_ind', '$inicio', '$fim', '$registro', '$sei')";
+        VALUES ($id_usuario, $id_iniciativa, '$orc', '$bm_valor', '$saldo', '$bm_ind', $inicio, $fim, '$registro', '$sei')";
         }
         mysqli_query($conexao, $sql);
     }
@@ -72,7 +72,7 @@ function formatarParaBrasileiro($valor) {
 <div class="container">
     <h2><?php echo htmlspecialchars($nome_iniciativa); ?> - Acompanhamento de Medidas</h2>
 
-    <form method="post" action="medicoes.php?id_iniciativa=<?php echo $id_iniciativa; ?>">
+    <form method="post" action="index.php?page=medicoes&id_iniciativa=<?php echo $id_iniciativa; ?>">
         <div class="table-wrapper">
         <table id="medicoes">
             <thead>
@@ -103,7 +103,7 @@ function formatarParaBrasileiro($valor) {
                 <td><input type="text" name="valor_bm[]" value="<?php echo formatarParaBrasileiro($linha['valor_bm']); ?>" required /></td>
                 <td><input type="text" name="saldo_obra[]" value="<?php echo formatarParaBrasileiro($linha['saldo_obra']); ?>" /></td>
                 
-                <td><input type="text" name="bm[]" value="<?php echo intval($linha['bm']); ?>" /></td> 
+                <td><input type="text" name="bm[]" value="<?php echo htmlspecialchars($linha['bm']); ?>" /></td>
                 <td><input type="text" name="numero_processo_sei[]" value="<?php echo htmlspecialchars($linha['numero_processo_sei'] ?? ''); ?>" /></td>
 
                 <td><input type="date" name="data_inicio[]" value="<?php echo htmlspecialchars($linha['data_inicio']); ?>" /></td>

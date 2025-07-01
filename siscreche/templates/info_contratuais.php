@@ -113,13 +113,20 @@ if (isset($_POST['salvar'])) {
         mysqli_query($conexao, $query_insert_medicao);
     }
 
-    header("Location: infocontratuais.php?id_iniciativa=$id_iniciativa");
-    exit;
+    if (!headers_sent()) {
+        header("Location: index.php?page=info_contratuais&id_iniciativa=$id_iniciativa");
+        exit;
+    } else {
+        echo "Redirecionamento falhou! <a href='index.php?page=info_contratuais&id_iniciativa=$id_iniciativa'>Clique aqui para continuar</a>";
+        exit;
+    }
+
 }
 ?>
 
   <div class="container">
-    <form method="post" action="infocontratuais.php">
+    <form method="post" action="index.php?page=info_contratuais">
+
       <input type="hidden" name="id_iniciativa" value="<?php echo $id_iniciativa; ?>">
       <div class="main-title"><?php echo htmlspecialchars($nome_iniciativa); ?> - Informações Contratuais</div>
       <table>

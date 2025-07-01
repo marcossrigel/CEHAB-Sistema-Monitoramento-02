@@ -32,7 +32,7 @@ const campos = [
     { name: 'valor_orcamento[]', type: 'text', required: true, value: valorOrcamentoOriginal },
     { name: 'valor_bm[]', type: 'text', required: true },
     { name: 'saldo_obra[]', type: 'text' },
-    { name: 'bm[]', type: 'number', step: '1' },
+    { name: 'bm[]', type: 'text' },
     { name: 'numero_processo_sei[]', type: 'text' },
     { name: 'data_inicio[]', type: 'date' },
     { name: 'data_fim[]', type: 'date' }
