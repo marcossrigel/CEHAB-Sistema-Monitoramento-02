@@ -11,7 +11,7 @@ if (!isset($_SESSION['id_usuario'])) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_GET['page'] ?? '') === 'formulario') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $iniciativa = trim($_POST['iniciativa']);
     $check_query = "SELECT * FROM iniciativas WHERE iniciativa = '$iniciativa'";
     $check_result = mysqli_query($conexao, $check_query);
@@ -38,9 +38,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_GET['page'] ?? '') === 'formular
     $observacoes = mysqli_real_escape_string($conexao, $_POST['observacoes']);
     $id_usuario = $_SESSION['id_usuario'];
 
-    $result = mysqli_query($conexao, "INSERT INTO iniciativas(id_usuario,iniciativa,data_vistoria,numero_contrato,ib_status,ib_execucao,ib_previsto,ib_variacao,ib_valor_medio,ib_secretaria,ib_orgao,ib_gestor_responsavel,ib_fiscal,ib_numero_processo_sei,objeto,informacoes_gerais,observacoes) VALUES ('$id_usuario', '$iniciativa','$data_vistoria','$numero_contrato','$ib_status','$ib_execucao','$ib_previsto','$ib_variacao','$ib_valor_medio','$ib_secretaria','$ib_orgao','$ib_gestor_responsavel','$ib_fiscal','$ib_numero_processo_sei','$objeto','$informacoes_gerais','$observacoes')");
+    $result = mysqli_query($conexao, "
+    INSERT INTO iniciativas (
+        id_usuario, iniciativa, data_vistoria, numero_contrato,
+        ib_status, ib_execucao, ib_previsto, ib_variacao,
+        ib_valor_medio, ib_secretaria, ib_orgao,
+        ib_gestor_responsavel, ib_fiscal, ib_numero_processo_sei,
+        objeto, informacoes_gerais, observacoes
+    ) VALUES (
+        '$id_usuario', '$iniciativa', '$data_vistoria', '$numero_contrato',
+        '$ib_status', '$ib_execucao', '$ib_previsto', '$ib_variacao',
+        '$ib_valor_medio', '$ib_secretaria', '$ib_orgao',
+        '$ib_gestor_responsavel', '$ib_fiscal', '$ib_numero_processo_sei',
+        '$objeto', '$informacoes_gerais', '$observacoes'
+    )
+");
 
-    header("Location: index.php?page=formulario&sucesso=1&nome=" . urlencode($iniciativa));
+    header("Location: index.php?page=formulario");
     exit;
 }
 ?>
@@ -221,12 +235,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_GET['page'] ?? '') === 'formular
   </form>
 </div>
 
-<?php
-  $mensagem = '';
-  if (isset($_GET['sucesso']) && $_GET['sucesso'] == 1 && isset($_GET['nome'])) {
-      $mensagem = 'Iniciativa "' . htmlspecialchars($_GET['nome']) . '" criada com sucesso!';
-  }
-?>
 <div id="modal-cancelar" class="modal hidden">
   <div class="modal-content">
     <p>Você deseja cancelar? Os dados preenchidos podem ser perdidos.</p>
@@ -235,7 +243,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_GET['page'] ?? '') === 'formular
   </div>
 </div>
 
-<div id="modal" class="modal hidden" data-mensagem="<?php echo $mensagem; ?>" aria-modal="true" role="dialog">
+<div id="modal" class="modal hidden" aria-modal="true" role="dialog">
   <div class="modal-content">
     <p id="modal-message"></p>
     <button onclick="closeModal()">Fechar</button>

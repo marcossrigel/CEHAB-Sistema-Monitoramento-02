@@ -1,8 +1,12 @@
-  document.querySelector('form').addEventListener('submit', function(e) {
-    const prefixo = document.getElementById('numero_contrato_prefixo').value.padStart(3, '0');
-    const ano = document.getElementById('numero_contrato_ano').value;
-    document.getElementById('numero_contrato').value = `${prefixo}/${ano}`;
-  });
+document.querySelector('form').addEventListener('submit', function(e) {
+  const prefixo = document.getElementById('numero_contrato_prefixo').value.padStart(3, '0');
+  const ano = document.getElementById('numero_contrato_ano').value;
+  document.getElementById('numero_contrato').value = `${prefixo}/${ano}`;
+
+  const nomeIniciativa = document.querySelector('input[name="iniciativa"]').value;
+  localStorage.setItem('iniciativaCriada', nomeIniciativa);
+});
+
 
   const execucaoInput = document.querySelector('input[name="ib_execucao"]');
   const previstoInput = document.querySelector('input[name="ib_previsto"]');
@@ -48,11 +52,17 @@ document.getElementById('btn-nao').addEventListener('click', function() {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
-  const modal = document.getElementById('modal');
-  const mensagem = modal.getAttribute('data-mensagem');
+  const nomeCriada = localStorage.getItem('iniciativaCriada');
+  if (nomeCriada) {
+    const modal = document.getElementById('modal');
+    const message = document.getElementById('modal-message');
+    
+    if (modal && message) {
+      message.innerText = `Iniciativa "${nomeCriada}" criada com sucesso!`;
+      modal.classList.remove('hidden');
+    }
 
-  if (mensagem && mensagem.trim() !== '') {
-    showModal(mensagem);
+    localStorage.removeItem('iniciativaCriada');
   }
 });
 

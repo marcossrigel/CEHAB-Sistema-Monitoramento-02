@@ -1,5 +1,28 @@
 <?php
+require_once("templates/config.php");
+
+# $token = $_GET["access_dinamic"];
+
+/* $query = "SELECT * FROM token_sessao WHERE token = ?";
+$stmt = mysqli_prepare($conexao2, $query);
+mysqli_stmt_bind_param($stmt, "ss", $token);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+
+$id_user = $result["id_user"];
+
+$query = "SELECT * FROM users WHERE g_id = ?";
+$stmt = mysqli_prepare($conexao2, $query);
+mysqli_stmt_bind_param($stmt, "ss", $id_user);
+mysqli_stmt_execute($stmt);
+$result2 = mysqli_stmt_get_result($stmt); */
+
 session_start();
+
+/* $_SESSION["id_user"] = $result2["g_id"];
+$_SESSION["username"] = $result2["u_nome_completo"];
+$_SESSION["setor"] = $result2["setor_local"]; */
+
 if (!isset($_SESSION['id_usuario'])) {
     header('Location: login.php');
     exit;

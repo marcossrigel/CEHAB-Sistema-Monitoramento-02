@@ -18,10 +18,12 @@ if (mysqli_num_rows($result) == 1) {
     $_SESSION['nome'] = $usuario['nome'];
     $_SESSION['tipo_usuario'] = $usuario['tipo'];
 
+    $baseURL = (strpos($_SERVER['HTTP_HOST'], 'localhost') !== false) ? '' : 'https://creches.getic.pe.gov.br/';
+
     if ($usuario['tipo'] === 'admin') {
-    header('Location: /CEHAB-Sistema-Monitoramento/siscreche/index.php?page=diretorias');
+        header("Location: {$baseURL}index.php?page=diretorias");
     } else {
-        header('Location: /CEHAB-Sistema-Monitoramento/siscreche/index.php?page=home');
+        header("Location: {$baseURL}index.php?page=home");
     }
     exit;
 } else {

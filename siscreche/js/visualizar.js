@@ -1,4 +1,4 @@
-// Script accordion (deve estar aí já)
+
 const accordions = document.querySelectorAll(".accordion");
 accordions.forEach((acc) => {
   acc.addEventListener("click", function () {
@@ -8,15 +8,37 @@ accordions.forEach((acc) => {
   });
 });
 
-// Script para ativar o drag-and-drop
+
 new Sortable(document.getElementById('sortable'), {
   animation: 150,
   handle: '.accordion',
-  ghostClass: 'drag-ghost'
+  ghostClass: 'drag-ghost',
+  onEnd: function () {
+    const novaOrdem = [];
+
+    document.querySelectorAll('#sortable .item .accordion').forEach((el, index) => {
+      novaOrdem.push({ id: el.dataset.id, ordem: index });
+    });
+
+    fetch('templates/salvar_ordem.php', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(novaOrdem)
+    }).then(res => res.json())
+      .then(data => {
+        if (data.status === 'sucesso') {
+          console.log('Ordem atualizada com sucesso!');
+        } else {
+          console.error('Erro ao salvar ordem:', data.erro);
+        }
+      });
+  }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Abrir o painel salvo
+
   const painelAberto = localStorage.getItem('painelAberto');
   if (painelAberto) {
     const acc = document.querySelector(`.accordion[data-id="${painelAberto}"]`);
@@ -27,14 +49,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 2. Comportamento do accordion
   document.querySelectorAll('.accordion').forEach(btn => {
     btn.addEventListener('click', () => {
       const panel = btn.nextElementSibling;
 
       const isOpen = panel.style.maxHeight;
 
-      // Fecha todos os outros
       document.querySelectorAll('.accordion').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.panel').forEach(p => p.style.maxHeight = null);
 

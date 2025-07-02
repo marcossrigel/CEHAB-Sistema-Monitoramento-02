@@ -16,11 +16,12 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
 if ($tipo_usuario === 'admin' && isset($_GET['diretoria'])) {
     $diretoria = $conexao->real_escape_string($_GET['diretoria']);
     $sql = "SELECT * FROM iniciativas 
-            WHERE id_usuario IN (
-              SELECT id_usuario FROM usuarios WHERE diretoria = '$diretoria'
-            )";
+        WHERE id_usuario IN (
+          SELECT id_usuario FROM usuarios WHERE diretoria = '$diretoria'
+        )
+        ORDER BY ordem ASC";
 } else {
-    $sql = "SELECT * FROM iniciativas WHERE id_usuario = $id_usuario";
+    $sql = "SELECT * FROM iniciativas WHERE id_usuario = $id_usuario ORDER BY ordem ASC";
 }
 
 $resultado = $conexao->query($sql);
