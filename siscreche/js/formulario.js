@@ -4,9 +4,7 @@ document.querySelector('form').addEventListener('submit', function(e) {
   document.getElementById('numero_contrato').value = `${prefixo}/${ano}`;
 
   const nomeIniciativa = document.querySelector('input[name="iniciativa"]').value;
-  localStorage.setItem('iniciativaCriada', nomeIniciativa);
 });
-
 
   const execucaoInput = document.querySelector('input[name="ib_execucao"]');
   const previstoInput = document.querySelector('input[name="ib_previsto"]');

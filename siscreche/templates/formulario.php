@@ -1,5 +1,4 @@
 <?php
-
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
@@ -53,6 +52,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         '$objeto', '$informacoes_gerais', '$observacoes'
     )
 ");
+
+if ($result) {
+    echo "
+    <script>
+        localStorage.setItem('iniciativaCriada', " . json_encode($iniciativa) . ");
+        window.location.href = 'index.php?page=formulario';
+    </script>";
+    exit;
+}
 
     header("Location: index.php?page=formulario");
     exit;
