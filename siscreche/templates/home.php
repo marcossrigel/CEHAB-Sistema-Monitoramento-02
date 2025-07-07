@@ -10,7 +10,7 @@
       <a href="index.php?page=formulario" class="btn">Criar Iniciativa</a>
       <a href="index.php?page=visualizar" class="btn btn-secondary">Minhas Vistorias</a>
       <button onclick="document.getElementById('modalCompartilhar').style.display='block'">Compartilhar</button>
-      <a href="templates/logout.php" class="texto-login">Sair</a>
+      <a href="https://www.getic.pe.gov.br/?p=auth_painel" class="texto-login">Sair</a>
     </div>
 
     <?php if (isset($_GET['compartilhado'])): ?>
