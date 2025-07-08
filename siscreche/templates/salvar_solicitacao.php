@@ -1,5 +1,5 @@
 <?php
-require_once("templates/config.php");
+require_once("config.php");
 
 $nome = $_POST['nome'];
 $telefone = $_POST['telefone'];
