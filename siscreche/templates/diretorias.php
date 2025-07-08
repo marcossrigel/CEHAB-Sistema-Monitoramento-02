@@ -44,6 +44,6 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
 </div>
 
 <div class="botao-sair">
-  <a href="templates/login.php">Sair</a>
+  <a href="templates/sair.php" style="color: red; font-weight: bold;">Sair</a>
 </div>
 

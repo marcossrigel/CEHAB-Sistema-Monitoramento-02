@@ -19,6 +19,7 @@ elseif (isset($_GET["access_dinamic"])) {
     session_unset();
     session_destroy();
     session_start();
+
     $token = $_GET["access_dinamic"];
 
     $query = "SELECT g_id FROM token_sessao WHERE token = ?";
@@ -48,12 +49,13 @@ elseif (isset($_GET["access_dinamic"])) {
     $resultLocal = mysqli_stmt_get_result($stmtLocal);
     $usuarioLocal = mysqli_fetch_assoc($resultLocal);
 
-    if (!$usuarioLocal) {
-    // Redireciona para tela de solicitação
-        header("Location: index.php?page=solicitar_usuario&nome=" . urlencode($userData['u_nome_completo']) . "&g_id=" . $g_id);
+    // 👇 Só agora você verifica
+    if (!$usuarioLocal || empty($usuarioLocal["id_usuario_cehab_online"])) {
+        header("Location: templates/solicitar_usuario.php?nome=" . urlencode($userData['u_nome_completo']) . "&g_id=" . $g_id);
         exit;
     }
 
+    // Sessão para usuários válidos
     $_SESSION["id_usuario"]   = $usuarioLocal["id_usuario"];
     $_SESSION["nome"]         = $userData["u_nome_completo"];
     $_SESSION["tipo_usuario"] = $usuarioLocal["tipo"];
