@@ -46,7 +46,7 @@ $res_compartilhados = $conexao->query($sql_compartilhados);
         <?php endif; ?>
 
         <br>
-        <button type="submit" class="btn">Confirmar Compartilhamento</button>
+        <button type="submit" class="btn">Compartilhar</button>
         <a href="index.php?page=visualizar" class="texto-login">Cancelar</a>
     </form>
 
