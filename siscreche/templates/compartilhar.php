@@ -46,7 +46,7 @@ $res_compartilhados = $conexao->query($sql_compartilhados);
     <h2>Compartilhar Iniciativas</h2>
 
     <form action="siscreche/processa_compartilhamento.php" method="post">
-        <label for="usuario">Digite o nome do usuário:</label>
+        <label for="usuario">Nome do Usuario (REDE):</label>
         <input type="text" name="usuario" id="usuario" placeholder="Digite o nome do usuário da rede" required>
 
         <h3>Selecione as iniciativas a compartilhar:</h3>
