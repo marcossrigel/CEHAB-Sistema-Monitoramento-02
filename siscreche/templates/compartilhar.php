@@ -25,36 +25,20 @@ $sql_compartilhados = "
 $res_compartilhados = $conexao->query($sql_compartilhados);
 ?>
 
-<style>
-.icone-usuario {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  object-fit: cover;
-  vertical-align: middle;
-  margin-right: 8px;
-}
-.lista-compartilhados li {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-</style>
-
-<div class="container">
-    <h2>Compartilhar Iniciativas</h2>
-
+<div class="pagina-formulario">
+  <div class="formulario">
+    <h2 class="main-title">Compartilhar Iniciativas</h2>
+    
     <form action="siscreche/processa_compartilhamento.php" method="post">
-        <label for="usuario">Nome do Usuario (REDE):</label>
+        <label for="usuario" class="label">Nome do Usuário (REDE):</label>
         <input type="text" name="usuario" id="usuario" placeholder="Digite o nome do usuário da rede" required>
 
-        <h3>Selecione as iniciativas a compartilhar:</h3>
+        <h3 style="margin-top: 20px;">Selecione as iniciativas a compartilhar:</h3>
         <?php if ($res_iniciativas->num_rows > 0): ?>
             <?php while ($linha = $res_iniciativas->fetch_assoc()): ?>
-                <div>
-                    <input type="checkbox" name="iniciativas[]" value="<?php echo $linha['id']; ?>" id="inic<?php echo $linha['id']; ?>">
-                    <label for="inic<?php echo $linha['id']; ?>"><?php echo htmlspecialchars($linha['iniciativa']); ?></label>
+                <div style="margin: 6px 0;">
+                    <input type="checkbox" name="iniciativas[]" value="<?= $linha['id'] ?>" id="inic<?= $linha['id'] ?>">
+                    <label for="inic<?= $linha['id'] ?>"><?= htmlspecialchars($linha['iniciativa']) ?></label>
                 </div>
             <?php endwhile; ?>
         <?php else: ?>
@@ -62,23 +46,24 @@ $res_compartilhados = $conexao->query($sql_compartilhados);
         <?php endif; ?>
 
         <br>
-        <button type="submit" class="btn-verde">Confirmar Compartilhamento</button>
-        <a href="index.php?page=visualizar" class="btn-vermelho">Cancelar</a>
+        <button type="submit" class="btn">Confirmar Compartilhamento</button>
+        <a href="index.php?page=visualizar" class="texto-login">Cancelar</a>
     </form>
 
     <hr>
 
-    <h3>Já Compartilhado com:</h3>
+    <h3 style="margin-top: 30px;">Já Compartilhado com:</h3>
     <ul class="lista-compartilhados">
         <?php if ($res_compartilhados->num_rows > 0): ?>
             <?php while ($linha = $res_compartilhados->fetch_assoc()): ?>
                 <li>
                     <img src="perfil.png" alt="Foto de perfil" class="icone-usuario">
-                    <?php echo htmlspecialchars($linha['nome_usuario']); ?>
+                    <?= htmlspecialchars($linha['nome_usuario']) ?>
                 </li>
             <?php endwhile; ?>
         <?php else: ?>
             <p>Nenhum usuário ainda.</p>
         <?php endif; ?>
     </ul>
+  </div>
 </div>
