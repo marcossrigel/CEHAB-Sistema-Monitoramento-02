@@ -49,13 +49,11 @@ elseif (isset($_GET["access_dinamic"])) {
     $resultLocal = mysqli_stmt_get_result($stmtLocal);
     $usuarioLocal = mysqli_fetch_assoc($resultLocal);
 
-    // 👇 Só agora você verifica
     if (!$usuarioLocal || empty($usuarioLocal["id_usuario_cehab_online"])) {
         header("Location: templates/solicitar_usuario.php?nome=" . urlencode($userData['u_nome_completo']) . "&g_id=" . $g_id);
         exit;
     }
 
-    // Sessão para usuários válidos
     $_SESSION["id_usuario"]   = $usuarioLocal["id_usuario"];
     $_SESSION["nome"]         = $userData["u_nome_completo"];
     $_SESSION["tipo_usuario"] = $usuarioLocal["tipo"];
@@ -97,7 +95,8 @@ else {
         'info_contratuais' => 'info_contratuais.css',
         'medicoes' => 'medicoes.css',
         'cronogramamarcos' => 'cronogramamarcos.css',
-        'solicitar_usuario' => 'formulario.css'
+        'solicitar_usuario' => 'formulario.css',
+        'compartilhar' => 'formulario.css'
     ];
     if (isset($cssMap[$page])) {
         echo '<link rel="stylesheet" href="assets/css/' . $cssMap[$page] . '">';
