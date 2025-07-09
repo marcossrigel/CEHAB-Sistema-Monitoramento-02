@@ -1,12 +1,46 @@
-<div class="formulario-container" style="max-width: 500px; margin: 40px auto; padding: 30px; background: white; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); font-family: Poppins, sans-serif;">
-  <h2 style="text-align: center; margin-bottom: 20px;">Solicitação de Acesso</h2>
-  <form method="POST" action="salvar_solicitacao.php">
-    <label for="nome">Nome Completo</label>
-    <input type="text" id="nome" name="nome" placeholder="Digite seu nome completo" required style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px;" />
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Solicitação de Acesso</title>
+  <link rel="stylesheet" href="../assets/css/formulario.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="solicitar-acesso">
+  <main>
+    <div class="pagina-formulario">
+      <form method="POST" action="../templates/salvar_solicitacao.php" class="formulario">
+        <h2 class="main-title">Solicitação de Acesso</h2>
 
-    <label for="telefone">Telefone</label>
-    <input type="text" id="telefone" name="telefone" placeholder="(xx) xxxxx-xxxx" required style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 5px;" />
+        <div class="linha">
+          <div class="campo-longo">
+            <label for="nome" class="label">Nome Completo</label>
+            <input type="text" id="nome" name="nome" placeholder="Digite seu nome completo" required
+              value="<?php echo isset($_GET['nome']) ? htmlspecialchars(urldecode($_GET['nome'])) : ''; ?>">
+          </div>
+        </div>
 
-    <button type="submit" style="width: 100%; background-color: #28a745; color: white; padding: 12px; border: none; border-radius: 5px; font-weight: bold;">Solicitar Acesso</button>
-  </form>
-</div>
+        <div class="linha">
+          <div class="campo-longo">
+            <label for="nome_rede" class="label">Nome de Usuário na Rede CEHAB</label>
+            <input type="text" id="nome_rede" name="nome_rede" placeholder="Ex: marcos.rigel" required
+              value="<?php echo isset($_GET['rede']) ? htmlspecialchars(urldecode($_GET['rede'])) : ''; ?>">
+          </div>
+        </div>
+
+        <div class="linha">
+          <div class="campo-longo">
+            <label for="telefone" class="label">Telefone</label>
+            <input type="text" id="telefone" name="telefone" placeholder="(xx) xxxxx-xxxx" required>
+          </div>
+        </div>
+
+        <input type="hidden" name="g_id" value="<?php echo isset($_GET['g_id']) ? intval($_GET['g_id']) : ''; ?>">
+
+        <button type="submit" class="btn">Solicitar Acesso</button>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

@@ -157,7 +157,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <button type="submit">Salvar Alterações</button>
-    <button type="button" onclick="abrirModal()" style="background-color: transparent; border: none; cursor: pointer; font-size: 18px; color: red; font-weight: bold;">delete</button>
+    <?php if ($row['id_usuario'] == $_SESSION['id_usuario']): ?>
+      <button type="button" onclick="abrirModal()" style="background-color: transparent; border: none; cursor: pointer; font-size: 18px; color: red; font-weight: bold;">delete</button>
+    <?php endif; ?>
   </form>
 
   <div class="botao-voltar">

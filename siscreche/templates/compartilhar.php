@@ -1,4 +1,5 @@
 <form method="POST" action="salvar_compartilhamento.php">
+  <input type="hidden" name="id_iniciativa" value="<?php echo $_GET['id']; ?>">
   <label>Compartilhar com:</label>
   <select name="id_compartilhado">
     <?php

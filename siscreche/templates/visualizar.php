@@ -33,19 +33,22 @@ $resultado = $conexao->query($sql);
 ?>
 
 <div class="container">
-  <div class="topo-linha">
-    
-    <div class="voltar-box"></div>
-    <h1>
-      <?php 
-        if ($tipo_usuario === 'admin' && isset($_GET['diretoria'])) {
-          echo "Iniciativas da Diretoria: " . htmlspecialchars($_GET['diretoria']);
-        } else {
-          echo "Iniciativas Cadastradas";
-        }
-      ?>
-    </h1>
-  </div>
+  <div class="topo-linha" style="position: relative; padding: 20px 0;">
+  <h1 style="text-align: center; margin: 0;">
+    <?php 
+      if ($tipo_usuario === 'admin' && isset($_GET['diretoria'])) {
+        echo "Iniciativas da Diretoria: " . htmlspecialchars($_GET['diretoria']);
+      } else {
+        echo "Iniciativas Cadastradas";
+      }
+    ?>
+  </h1>
+
+  <a href="index.php?page=compartilhar&id=<?php echo $id_usuario; ?>" 
+     style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); text-decoration: none; background-color: #007bff; color: white; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 14px;">
+    👥 Compartilhar
+  </a>
+</div>
 
   <div id="sortable">
     <?php while ($row = $resultado->fetch_assoc()): ?>

@@ -206,6 +206,17 @@ select {
   cursor: pointer;
 }
 
+body.solicitar-acesso main {
+  align-items: center;
+  min-height: 100vh;
+  padding: 0;
+}
+
+body.solicitar-acesso .formulario-container {
+  max-width: 400px;
+  margin: auto;
+}
+
 .modal-content button:hover {
   background-color: #42b72a;
 }
