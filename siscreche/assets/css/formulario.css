@@ -127,6 +127,41 @@ button.btn {
   display: block;
 }
 
+.btn-remover {
+  background: none;
+  border: none;
+  color: red;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: 8px;
+}
+.btn-remover:hover {
+  opacity: 0.7;
+}
+
+.lista-compartilhados li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0.5rem;
+}
+
+.lista-compartilhados li button.btn-remover {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  margin-left: auto;
+  padding: 0;
+  color: #444;
+}
+
+.lista-compartilhados li button.btn-remover:hover {
+  color: red;
+  transform: scale(1.1);
+}
+
+
 button.btn:hover {
   background-color: #36a420;
 }
