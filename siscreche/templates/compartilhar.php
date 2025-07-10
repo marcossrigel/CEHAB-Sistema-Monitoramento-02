@@ -29,7 +29,7 @@ $res_compartilhados = $conexao->query($sql_compartilhados);
   <div class="formulario">
     <h2 class="main-title">Compartilhar Iniciativas</h2>
     
-    <form action="siscreche/processa_compartilhamento.php" method="post">
+    <form action="index.php?page=salvar_compartilhamento" method="post">
         <label for="usuario" class="label">Nome do Usuário (REDE):</label>
         <input type="text" name="usuario" id="usuario" placeholder="Digite o nome do usuário da rede" required>
 
@@ -123,7 +123,7 @@ document.querySelectorAll(".btn-remover").forEach(button => {
     button.addEventListener("click", function () {
         const id = this.getAttribute("data-id");
         if (confirm("Deseja remover este compartilhamento?")) {
-            fetch("templates/remover_compartilhamento.php", {
+            fetch("siscreche/templates/remover_compartilhamento.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"

@@ -96,7 +96,9 @@ else {
         'medicoes' => 'medicoes.css',
         'cronogramamarcos' => 'cronogramamarcos.css',
         'solicitar_usuario' => 'formulario.css',
-        'compartilhar' => 'formulario.css'
+        'compartilhar' => 'formulario.css',
+        'remover_compartilhamento' => 'formulario.css',
+        'salvar_compartilhamento' => 'formulario.css'
     ];
     if (isset($cssMap[$page])) {
         echo '<link rel="stylesheet" href="assets/css/' . $cssMap[$page] . '">';
