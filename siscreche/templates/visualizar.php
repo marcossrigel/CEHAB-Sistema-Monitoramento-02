@@ -22,11 +22,11 @@ if ($tipo_usuario === 'admin' && isset($_GET['diretoria'])) {
         ORDER BY ordem ASC";
 } else {
     $sql = "SELECT * FROM iniciativas 
-        WHERE id_usuario = $id_usuario 
-        OR id_usuario IN (
-            SELECT id_dono FROM compartilhamentos WHERE id_compartilhado = $id_usuario
-        )
-        ORDER BY ordem ASC";
+      WHERE id_usuario = $id_usuario 
+      OR id IN (
+          SELECT id_iniciativa FROM compartilhamentos WHERE id_compartilhado = $id_usuario
+      )
+      ORDER BY ordem ASC";
 }
 
 $resultado = $conexao->query($sql);

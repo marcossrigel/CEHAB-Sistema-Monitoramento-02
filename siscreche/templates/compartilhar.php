@@ -123,7 +123,7 @@ document.querySelectorAll(".btn-remover").forEach(button => {
     button.addEventListener("click", function () {
         const id = this.getAttribute("data-id");
         if (confirm("Deseja remover este compartilhamento?")) {
-            fetch("siscreche/templates/remover_compartilhamento.php", {
+            fetch("templates/remover_compartilhamento.php", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded"
