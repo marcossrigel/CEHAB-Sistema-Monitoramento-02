@@ -283,6 +283,24 @@ textarea {
       </div>
     
     </div>
+
+      <div id="modalInserirLinha" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 9999;">
+      <div style="background: #fff; padding: 20px; width: 320px; margin: 100px auto; border-radius: 10px; text-align: center;">
+        <h3>Inserir Linha</h3>
+        <label style="font-weight: bold;">Tipo da Linha:</label><br>
+        <select id="tipoInsercao" style="margin: 10px 0; padding: 6px; width: 100%;">
+          <option value="linha">Sub-Etapa</option>
+          <option value="subtitulo">Etapa</option>
+        </select>
+        <p>Digite o ID antes do qual deseja inserir:</p>
+        <input type="text" id="idParaInserir" placeholder="Ex: 2.1" style="padding: 6px; width: 100%;">
+        <div style="margin-top: 15px;">
+          <button onclick="confirmarInsercaoLinha()">Inserir</button>
+          <button onclick="fecharModalInserirLinha()" style="margin-left: 10px;">Cancelar</button>
+        </div>
+      </div>
+    </div>
+
   </form>
 
 </div>
@@ -655,6 +673,70 @@ function excluirLinhaPorId() {
   } else {
     document.getElementById('idExcluir').value = '';
   }
+
+}
+
+function abrirModalInserirLinha() {
+  document.getElementById('modalInserirLinha').style.display = 'block';
+}
+
+function fecharModalInserirLinha() {
+  document.getElementById('modalInserirLinha').style.display = 'none';
+  document.getElementById('idParaInserir').value = '';
+}
+
+function confirmarInsercaoLinha() {
+  const tipo = document.getElementById('tipoInsercao').value;
+  const idAlvo = document.getElementById('idParaInserir').value.trim();
+  if (!idAlvo) {
+    alert('Digite um ID de referência.');
+    return;
+  }
+
+  const linhas = document.querySelectorAll('#spreadsheet tbody tr');
+  let inserido = false;
+
+  linhas.forEach((linha, index) => {
+    const inputId = linha.querySelector('input[name="id_etapa_custom[]"]');
+    if (inputId && inputId.value.trim() === idAlvo && !inserido) {
+      const novaLinha = linha.cloneNode(true);
+      novaLinha.querySelectorAll('input, textarea').forEach(input => input.value = '');
+
+      const novoId = tipo === 'subtitulo' ? gerarNovoIdEtapa() : gerarNovoIdSubEtapa(inputId.value.trim());
+      novaLinha.querySelector('input[name="id_etapa_custom[]"]').value = novoId;
+      novaLinha.querySelector('input[name="tipo_etapa[]"]').value = tipo;
+
+      const tdEtapa = novaLinha.querySelector('textarea, input[type="text"]');
+      if (tipo === 'subtitulo') {
+        tdEtapa.placeholder = 'Título';
+        tdEtapa.className = 'campo-etapa-subtitulo';
+      } else {
+        tdEtapa.placeholder = '';
+        tdEtapa.className = 'campo-etapa';
+      }
+
+      linha.parentNode.insertBefore(novaLinha, linha);
+      inserido = true;
+    }
+  });
+
+  if (!inserido) {
+    alert('ID de referência não encontrado.');
+  }
+
+  fecharModalInserirLinha();
+  recalcularUltimoIdEtapa();
+  copiarInicioPrevistoDasSubetapas();
+}
+
+function gerarNovoIdEtapa() {
+  return ++ultimoIdEtapa;
+}
+
+function gerarNovoIdSubEtapa(idPai) {
+  const numPai = parseInt(idPai);
+  subEtapasPorEtapa[numPai] = (subEtapasPorEtapa[numPai] || 0) + 1;
+  return `${numPai}.${subEtapasPorEtapa[numPai]}`;
 }
 
 </script>

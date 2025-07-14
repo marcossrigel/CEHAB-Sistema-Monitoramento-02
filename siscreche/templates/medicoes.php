@@ -1,10 +1,12 @@
 <?php
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 if (!isset($_SESSION['id_usuario'])) {
     header('Location: login.php');
     exit;
 }
-
 include_once('config.php');
 
 $id_iniciativa = isset($_GET['id_iniciativa']) ? intval($_GET['id_iniciativa']) : 0;
@@ -16,6 +18,22 @@ $nome_iniciativa = $linha_nome['iniciativa'] ?? 'Iniciativa Desconhecida';
 
 if (isset($_POST['salvar'])) {
     $id_usuario = $_SESSION['id_usuario'];
+
+    $query_verificacao = "
+    SELECT 1 FROM iniciativas 
+    WHERE id = $id_iniciativa AND (
+        id_usuario = $id_usuario OR 
+        $id_usuario IN (
+            SELECT id_compartilhado FROM compartilhamentos 
+            WHERE id_iniciativa = $id_iniciativa
+        )
+    )";
+    $result_verificacao = mysqli_query($conexao, $query_verificacao);
+    if (mysqli_num_rows($result_verificacao) === 0) {
+        echo "Você não tem permissão para acessar esta iniciativa.";
+        exit;
+    }
+
     $valor_orcamento = $_POST['valor_orcamento'] ?? [];
     $valor_bm = $_POST['valor_bm'] ?? [];
     $saldo_obra = $_POST['saldo_obra'] ?? [];
@@ -46,7 +64,7 @@ if (isset($_POST['salvar'])) {
             $sql = "UPDATE medicoes 
         SET valor_orcamento='$orc', valor_bm='$bm_valor', saldo_obra='$saldo', bm='$bm_ind', 
             data_inicio=$inicio, data_fim=$fim, numero_processo_sei='$sei' 
-        WHERE id=$id_existente AND id_usuario=$id_usuario";
+       WHERE id=$id_existente AND id_iniciativa=$id_iniciativa";
         } else {
             $sql = "INSERT INTO medicoes (id_usuario, id_iniciativa, valor_orcamento, valor_bm, saldo_obra, bm, data_inicio, data_fim, data_registro, numero_processo_sei)
         VALUES ($id_usuario, $id_iniciativa, '$orc', '$bm_valor', '$saldo', '$bm_ind', $inicio, $fim, '$registro', '$sei')";
@@ -58,12 +76,13 @@ if (isset($_POST['salvar'])) {
 if (!empty($_POST['excluir_ids'])) {
     foreach ($_POST['excluir_ids'] as $id_excluir) {
         $id_excluir = intval($id_excluir);
-        $sql = "DELETE FROM medicoes WHERE id = $id_excluir AND id_usuario = {$_SESSION['id_usuario']}";
+        $sql = "DELETE FROM medicoes WHERE id = $id_excluir AND id_iniciativa = $id_iniciativa";
         mysqli_query($conexao, $sql);
     }
 }
 
-$dados = mysqli_query($conexao, "SELECT * FROM medicoes WHERE id_usuario = {$_SESSION['id_usuario']} AND id_iniciativa = $id_iniciativa");
+$dados = mysqli_query($conexao, "SELECT * FROM medicoes WHERE id_iniciativa = $id_iniciativa ORDER BY data_inicio");
+
 function formatarParaBrasileiro($valor) {
     return 'R$ ' . number_format((float)$valor, 2, ',', '.');
 }

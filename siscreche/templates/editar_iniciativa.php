@@ -86,10 +86,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <option value="Concluído" <?php if ($row['ib_status'] == 'Concluído') echo 'selected'; ?>>Concluído</option>
         </select>
       </div>
+      
       <div class="campo">
-        <label>Nº do Contrato:</label>
-        <input type="text" name="numero_contrato" value="<?php echo htmlspecialchars($row['numero_contrato']); ?>">
+        <label class="label">Nº do contrato</label>
+        <div style="display: flex;">
+          <?php
+            $contrato_parts = explode('/', $row['numero_contrato']);
+            $prefixo = $contrato_parts[0] ?? '';
+            $ano = $contrato_parts[1] ?? '';
+          ?>
+          <input type="text" name="numero_contrato_prefixo" id="numero_contrato_prefixo" maxlength="3" placeholder="000" pattern="\d{3}" required style="flex: 0 0 60px; text-align: center;" value="<?php echo htmlspecialchars($prefixo); ?>">
+          <span style="align-self: center; padding: 0 5px;">/</span>
+          <input type="text" name="numero_contrato_ano" id="numero_contrato_ano" maxlength="4" placeholder="2025" pattern="\d{4}" required style="flex: 0 0 70px; text-align: center;" value="<?php echo htmlspecialchars($ano); ?>">
+        </div>
       </div>
+
       <div class="campo">
         <label>Data da Atualização:</label>
         <input type="date" name="data_vistoria" value="<?php echo htmlspecialchars($row['data_vistoria']); ?>">

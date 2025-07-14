@@ -49,9 +49,9 @@ elseif (isset($_GET["access_dinamic"])) {
     $resultLocal = mysqli_stmt_get_result($stmtLocal);
     $usuarioLocal = mysqli_fetch_assoc($resultLocal);
 
-    if (!$usuarioLocal || empty($usuarioLocal["id_usuario_cehab_online"])) {
-        header("Location: templates/solicitar_usuario.php?nome=" . urlencode($userData['u_nome_completo']) . "&g_id=" . $g_id);
-        exit;
+    if (!$usuarioLocal || empty($usuarioLocal['id_usuario_cehab_online'])) {
+      header("Location: templates/solicitar_usuario.php?nome=" . urlencode($userData['u_nome_completo']) . "&g_id=" . $g_id);
+      exit;
     }
 
     $_SESSION["id_usuario"]   = $usuarioLocal["id_usuario"];

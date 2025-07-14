@@ -1,5 +1,7 @@
 <?php
-
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -10,23 +12,39 @@ if (!isset($_SESSION['id_usuario'])) {
 }
 
 include_once('config.php');
-
 if (!$conexao) {
     die("Erro na conexão com o banco: " . mysqli_connect_error());
 }
 
+$id_usuario = $_SESSION['id_usuario'];
 $id_iniciativa = isset($_POST['id_iniciativa']) ? intval($_POST['id_iniciativa']) : (isset($_GET['id_iniciativa']) ? intval($_GET['id_iniciativa']) : 0);
+
+$query_verificacao = "
+    SELECT 1 FROM iniciativas 
+    WHERE id = $id_iniciativa AND (
+        id_usuario = $id_usuario OR 
+        $id_usuario IN (
+            SELECT id_compartilhado FROM compartilhamentos 
+            WHERE id_iniciativa = $id_iniciativa
+        )
+    )";
+
+$result_verificacao = mysqli_query($conexao, $query_verificacao);
+if (mysqli_num_rows($result_verificacao) === 0) {
+    echo "Você não tem permissão para acessar esta iniciativa.";
+    exit;
+}
 
 $query_nome = "SELECT iniciativa FROM iniciativas WHERE id = $id_iniciativa";
 $result_nome = mysqli_query($conexao, $query_nome);
 $linha_nome = mysqli_fetch_assoc($result_nome);
 $nome_iniciativa = $linha_nome['iniciativa'] ?? 'Iniciativa Desconhecida';
 
-$query_busca = "SELECT * FROM contratuais WHERE id_usuario = {$_SESSION['id_usuario']} AND id_iniciativa = $id_iniciativa";
+$query_busca = "SELECT * FROM contratuais WHERE id_iniciativa = $id_iniciativa LIMIT 1";
 $resultado = mysqli_query($conexao, $query_busca);
 $dados = mysqli_fetch_assoc($resultado);
 
-  function formatar_moeda($valor) {
+function formatar_moeda($valor) {
     if ($valor === null || $valor === '') return 'R$ ';
     return 'R$ ' . number_format((float)$valor, 2, ',', '.');
 }
@@ -72,7 +90,7 @@ if (isset($_POST['salvar'])) {
             valor_contrato=$valor_contrato,
             cod_subtracao='$cod_subtracao',
             secretaria_demandante='$secretaria_demandante'
-            WHERE id_usuario={$_SESSION['id_usuario']} AND id_iniciativa=$id_iniciativa";
+            WHERE id_iniciativa=$id_iniciativa";
         mysqli_query($conexao, $query_update);
     } else {
         $query_insert = "INSERT INTO contratuais (

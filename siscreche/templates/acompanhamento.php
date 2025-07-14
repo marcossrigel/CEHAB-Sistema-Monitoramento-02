@@ -50,7 +50,7 @@ if (isset($_POST['salvar'])) {
     }
 }
 
-$dados_pendencias = mysqli_query($conexao, "SELECT * FROM pendencias WHERE id_usuario = {$_SESSION['id_usuario']} AND id_iniciativa = $id_iniciativa");
+$dados_pendencias = mysqli_query($conexao, "SELECT * FROM pendencias WHERE id_iniciativa = $id_iniciativa");
 
 $query_nome = "SELECT iniciativa FROM iniciativas WHERE id = $id_iniciativa";
 $resultado_nome = mysqli_query($conexao, $query_nome);

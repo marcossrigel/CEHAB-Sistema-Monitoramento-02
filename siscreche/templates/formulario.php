@@ -11,7 +11,13 @@ if (!isset($_SESSION['id_usuario'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    
     $iniciativa = trim($_POST['iniciativa']);
+    if (mb_strlen($iniciativa) > 255) {
+        echo "<script>alert('Erro: O nome da iniciativa não pode ultrapassar 255 caracteres.'); window.history.back();</script>";
+        exit;
+    }
+
     $check_query = "SELECT * FROM iniciativas WHERE iniciativa = '$iniciativa'";
     $check_result = mysqli_query($conexao, $check_query);
 
@@ -76,7 +82,7 @@ if ($result) {
       <div class="campo-pequeno">
         <label class="label">Nome da Iniciativa</label>
         
-        <input list="lista-iniciativas" name="iniciativa" class="campo" required placeholder="Digite ou selecione">
+        <input list="lista-iniciativas" name="iniciativa" class="campo" required placeholder="Digite ou selecione" maxlength="255">
         <datalist id="lista-iniciativas">
           <option value="Creche - Lote 01 (Cabrobó)">
           <option value="Creche - Lote 01 (Granito)">
@@ -188,7 +194,7 @@ if ($result) {
     <div class="linha">
       <div class="campo">
         <label class="label">Secretaria</label>
-        <input type="text" name="ib_secretaria" value="SEDUH" readonly>
+        <input type="text" name="ib_secretaria" placeholder="Digite a secretaria" value="">
       </div>
       <div class="campo">
         <label class="label">Órgão</label>
