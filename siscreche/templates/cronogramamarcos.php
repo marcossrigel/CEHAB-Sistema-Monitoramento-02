@@ -277,6 +277,7 @@ textarea {
       }
       ?>
       <button type="button" onclick="window.location.href='index.php?page=visualizar';">&lt; Voltar</button>
+      <button type="button" onclick="abrirModalInserirLinhaEspecifica()">Adicionar Linha Específica</button>
       <div style="margin-top: 10px;">
         <input type="text" id="idExcluir" placeholder="ID para excluir (ex: 3.1)" style="padding: 5px; width: 160px;">
         <button type="button" onclick="excluirLinhaPorId()">Excluir Linha Específica</button>
@@ -284,21 +285,23 @@ textarea {
     
     </div>
 
-      <div id="modalInserirLinha" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 9999;">
-      <div style="background: #fff; padding: 20px; width: 320px; margin: 100px auto; border-radius: 10px; text-align: center;">
-        <h3>Inserir Linha</h3>
-        <label style="font-weight: bold;">Tipo da Linha:</label><br>
-        <select id="tipoInsercao" style="margin: 10px 0; padding: 6px; width: 100%;">
-          <option value="linha">Sub-Etapa</option>
+      <div id="modalLinhaEspecifica" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;">
+      <div style="background:#fff; padding:20px; margin:100px auto; width:300px; border-radius:10px; text-align:center;">
+        <h3>Adicionar Linha Específica</h3>
+        <label>Tipo da Linha:</label><br>
+        <select id="tipoLinhaEspecifica">
           <option value="subtitulo">Etapa</option>
+          <option value="linha">Sub-Etapa</option>
         </select>
-        <p>Digite o ID antes do qual deseja inserir:</p>
-        <input type="text" id="idParaInserir" placeholder="Ex: 2.1" style="padding: 6px; width: 100%;">
-        <div style="margin-top: 15px;">
-          <button onclick="confirmarInsercaoLinha()">Inserir</button>
-          <button onclick="fecharModalInserirLinha()" style="margin-left: 10px;">Cancelar</button>
+        <p>Inserir antes do ID:</p>
+        <input type="text" id="idReferenciaLinha" placeholder="Ex: 3 ou 2.1" style="width:100%; padding:6px;">
+        <div style="margin-top:15px;">
+          <button onclick="confirmarInsercaoLinhaEspecifica()">Inserir</button>
+          <button onclick="fecharModalLinhaEspecifica()">Cancelar</button>
         </div>
       </div>
+    </div>
+
     </div>
 
   </form>
@@ -566,6 +569,7 @@ function converterParaDataISO(dataBR) {
 document.addEventListener('DOMContentLoaded', () => {
   recalcularUltimoIdEtapa();
   copiarInicioPrevistoDasSubetapas();
+  ordenarLinhasPorId();
 });
 
 function recalcularUltimoIdEtapa() {
@@ -685,48 +689,200 @@ function fecharModalInserirLinha() {
   document.getElementById('idParaInserir').value = '';
 }
 
-function confirmarInsercaoLinha() {
-  const tipo = document.getElementById('tipoInsercao').value;
-  const idAlvo = document.getElementById('idParaInserir').value.trim();
-  if (!idAlvo) {
-    alert('Digite um ID de referência.');
+function confirmarInsercaoLinhaEspecifica() {
+  const tipo = document.getElementById('tipoLinhaEspecifica').value;
+  const idRef = document.getElementById('idReferenciaLinha').value.trim();
+  if (!idRef) return alert('Informe um ID válido.');
+
+  if (tipo === 'subtitulo' && idRef.includes('.')) {
+    return alert("Etapa deve ser um número inteiro. Ex: 3");
+  }
+
+  if (tipo === 'linha' && !idRef.includes('.')) {
+    return alert("Sub-Etapa deve estar no formato 2.1, 2.2, etc.");
+  }
+
+  const table = document.querySelector('#spreadsheet tbody');
+  const linhas = table.querySelectorAll('tr');
+  let indexRef = -1;
+
+  // 1. Encontrar a linha de referência
+  for (let i = 0; i < linhas.length; i++) {
+    const inputId = linhas[i].querySelector('input[name="id_etapa_custom[]"]');
+    if (inputId && inputId.value.trim() === idRef) {
+      indexRef = i;
+      break;
+    }
+  }
+
+  if (indexRef === -1) {
+    alert('ID de referência não encontrado.');
     return;
   }
 
-  const linhas = document.querySelectorAll('#spreadsheet tbody tr');
-  let inserido = false;
+  // 2. Criar nova linha
+  const novaLinha = document.createElement('tr');
+  const campos = ['etapa', 'inicio_previsto', 'termino_previsto', 'inicio_real', 'termino_real', 'evolutivo'];
 
-  linhas.forEach((linha, index) => {
-    const inputId = linha.querySelector('input[name="id_etapa_custom[]"]');
-    if (inputId && inputId.value.trim() === idAlvo && !inserido) {
-      const novaLinha = linha.cloneNode(true);
-      novaLinha.querySelectorAll('input, textarea').forEach(input => input.value = '');
+  // Celula de ID
+  const idCell = document.createElement('td');
+  const idInput = document.createElement('input');
+  idInput.type = 'text';
+  idInput.name = 'id_etapa_custom[]';
+  idInput.value = idRef;
+  idInput.readOnly = true;
+  idInput.className = 'input-padrao';
+  idInput.style.textAlign = 'center';
+  idCell.appendChild(idInput);
+  novaLinha.appendChild(idCell);
 
-      const novoId = tipo === 'subtitulo' ? gerarNovoIdEtapa() : gerarNovoIdSubEtapa(inputId.value.trim());
-      novaLinha.querySelector('input[name="id_etapa_custom[]"]').value = novoId;
-      novaLinha.querySelector('input[name="tipo_etapa[]"]').value = tipo;
-
-      const tdEtapa = novaLinha.querySelector('textarea, input[type="text"]');
+  // Campos
+  campos.forEach((campo, index) => {
+    const cell = document.createElement('td');
+    if (index === 0) {
       if (tipo === 'subtitulo') {
-        tdEtapa.placeholder = 'Título';
-        tdEtapa.className = 'campo-etapa-subtitulo';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = 'Título';
+        input.className = 'campo-etapa-subtitulo';
+        input.name = campo + '[]';
+        cell.appendChild(input);
       } else {
-        tdEtapa.placeholder = '';
-        tdEtapa.className = 'campo-etapa';
+        const textarea = document.createElement('textarea');
+        textarea.name = campo + '[]';
+        textarea.rows = 2;
+        textarea.className = 'campo-etapa';
+        cell.appendChild(textarea);
       }
-
-      linha.parentNode.insertBefore(novaLinha, linha);
-      inserido = true;
+    } else {
+      const input = document.createElement('input');
+      input.name = campo + '[]';
+      input.type = campo === 'evolutivo' ? 'number' : 'date';
+      if (campo === 'evolutivo') {
+        input.min = 0;
+        input.max = 100;
+        input.step = 0.1;
+        input.placeholder = '0 a 100%';
+      }
+      input.className = 'input-padrao';
+      cell.appendChild(input);
     }
+    novaLinha.appendChild(cell);
   });
 
-  if (!inserido) {
-    alert('ID de referência não encontrado.');
+  // Inputs ocultos
+  const tipoInput = document.createElement('input');
+  tipoInput.type = 'hidden';
+  tipoInput.name = 'tipo_etapa[]';
+  tipoInput.value = tipo;
+  novaLinha.appendChild(tipoInput);
+
+  const idHidden = document.createElement('input');
+  idHidden.type = 'hidden';
+  idHidden.name = 'ids[]';
+  idHidden.value = '';
+  novaLinha.appendChild(idHidden);
+
+  // 3. Inserir a nova linha ANTES da linha de referência
+  const refLinha = table.rows[indexRef];
+  table.insertBefore(novaLinha, refLinha);
+
+  // 4. Só AGORA atualizar os IDs das etapas/subetapas seguintes
+  if (tipo === 'subtitulo') {
+    atualizarIDsEtapas(idRef);
+  } else {
+    atualizarIDsSubetapas(idRef);
   }
 
-  fecharModalInserirLinha();
+  fecharModalLinhaEspecifica();
   recalcularUltimoIdEtapa();
   copiarInicioPrevistoDasSubetapas();
+}
+
+function atualizarIDsEtapas(idInserir) {
+  const linhas = document.querySelectorAll('#spreadsheet tbody tr');
+  const etapaInserida = parseInt(idInserir);
+  let comecarIncremento = false;
+
+  for (let i = 0; i < linhas.length; i++) {
+    const inputId = linhas[i].querySelector('input[name="id_etapa_custom[]"]');
+    if (!inputId) continue;
+
+    const idAtual = inputId.value.trim();
+
+    // Só começa a incrementar DEPOIS de encontrar o idInserir
+    if (!comecarIncremento && !idAtual.includes('.') && parseInt(idAtual) === etapaInserida) {
+      comecarIncremento = true;
+      continue; // NÃO incrementa a linha da etapa que estamos inserindo
+    }
+
+    if (comecarIncremento) {
+      if (!idAtual.includes('.')) {
+        // É uma etapa
+        const etapa = parseInt(idAtual);
+        if (!isNaN(etapa)) {
+          inputId.value = etapa + 1;
+        }
+      } else {
+        // É uma subetapa
+        const [etapa, sub] = idAtual.split('.').map(n => parseInt(n));
+        if (!isNaN(etapa) && !isNaN(sub) && etapa >= etapaInserida) {
+          inputId.value = `${etapa + 1}.${sub}`;
+        }
+      }
+    }
+  }
+}
+
+
+function atualizarIDsSubetapas(idInserir) {
+  const [etapaPai, subRef] = idInserir.split('.').map(n => parseInt(n));
+  const linhas = document.querySelectorAll('#spreadsheet tbody tr');
+  for (let i = linhas.length - 1; i >= 0; i--) {
+    const inputId = linhas[i].querySelector('input[name="id_etapa_custom[]"]');
+    if (!inputId) continue;
+    const idAtual = inputId.value.trim();
+    if (idAtual.startsWith(`${etapaPai}.`)) {
+      const [et, sub] = idAtual.split('.').map(n => parseInt(n));
+      if (sub >= subRef) {
+        inputId.value = `${et}.${sub + 1}`;
+      }
+    }
+  }
+}
+
+function abrirModalInserirLinhaEspecifica() {
+  document.getElementById('modalLinhaEspecifica').style.display = 'block';
+}
+
+function fecharModalLinhaEspecifica() {
+  document.getElementById('modalLinhaEspecifica').style.display = 'none';
+  document.getElementById('idReferenciaLinha').value = '';
+}
+
+function inserirLinhaEspecifica(index, tipo, idNovo) {
+  const table = document.querySelector('#spreadsheet tbody');
+  const refLinha = table.rows[index];
+  const novaLinha = refLinha.cloneNode(true);
+
+  novaLinha.querySelectorAll('input, textarea').forEach(input => input.value = '');
+
+  const inputId = novaLinha.querySelector('input[name="id_etapa_custom[]"]');
+  inputId.value = idNovo;
+
+  const tipoInput = novaLinha.querySelector('input[name="tipo_etapa[]"]');
+  tipoInput.value = tipo;
+
+  const campoTexto = novaLinha.querySelector('textarea, input[type="text"]');
+  if (tipo === 'subtitulo') {
+    campoTexto.placeholder = 'Título';
+    campoTexto.className = 'campo-etapa-subtitulo';
+  } else {
+    campoTexto.placeholder = '';
+    campoTexto.className = 'campo-etapa';
+  }
+
+  table.insertBefore(novaLinha, refLinha);
 }
 
 function gerarNovoIdEtapa() {
@@ -737,6 +893,29 @@ function gerarNovoIdSubEtapa(idPai) {
   const numPai = parseInt(idPai);
   subEtapasPorEtapa[numPai] = (subEtapasPorEtapa[numPai] || 0) + 1;
   return `${numPai}.${subEtapasPorEtapa[numPai]}`;
+}
+
+function ordenarLinhasPorId() {
+  const tbody = document.querySelector('#spreadsheet tbody');
+  const linhas = Array.from(tbody.querySelectorAll('tr'));
+
+  linhas.sort((a, b) => {
+    const idA = a.querySelector('input[name="id_etapa_custom[]"]').value;
+    const idB = b.querySelector('input[name="id_etapa_custom[]"]').value;
+
+    const partesA = idA.split('.').map(Number);
+    const partesB = idB.split('.').map(Number);
+
+    for (let i = 0; i < Math.max(partesA.length, partesB.length); i++) {
+      const numA = partesA[i] || 0;
+      const numB = partesB[i] || 0;
+      if (numA !== numB) return numA - numB;
+    }
+
+    return 0;
+  });
+
+  linhas.forEach(linha => tbody.appendChild(linha));
 }
 
 </script>

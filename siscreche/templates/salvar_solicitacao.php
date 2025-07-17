@@ -1,7 +1,7 @@
 <?php
 require_once("config.php");
 
-// Verifica se os campos foram enviados
+
 if (isset($_POST['nome'], $_POST['telefone'], $_POST['nome_rede'])) {
     $nome = $_POST['nome'];
     $telefone = $_POST['telefone'];
@@ -14,7 +14,6 @@ if (isset($_POST['nome'], $_POST['telefone'], $_POST['nome_rede'])) {
         mysqli_stmt_bind_param($stmt, "sss", $nome, $nome_rede, $telefone);
         mysqli_stmt_execute($stmt);
 
-        // Verifica se inseriu com sucesso
         if (mysqli_stmt_affected_rows($stmt) > 0) {
             echo "<script>alert('Solicitação enviada com sucesso!'); window.location.href='https://www.getic.pe.gov.br/?p=home';</script>";
             exit;
