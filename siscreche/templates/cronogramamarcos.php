@@ -293,7 +293,7 @@ textarea {
           <option value="subtitulo">Etapa</option>
           <option value="linha">Sub-Etapa</option>
         </select>
-        <p>Inserir antes do ID:</p>
+        <p>Inserir em qual posição?</p>
         <input type="text" id="idReferenciaLinha" placeholder="Ex: 3 ou 2.1" style="width:100%; padding:6px;">
         <div style="margin-top:15px;">
           <button onclick="confirmarInsercaoLinhaEspecifica()">Inserir</button>
@@ -703,10 +703,10 @@ function confirmarInsercaoLinhaEspecifica() {
   }
 
   const table = document.querySelector('#spreadsheet tbody');
-  const linhas = table.querySelectorAll('tr');
+  const linhas = Array.from(table.querySelectorAll('tr'));
   let indexRef = -1;
 
-  // 1. Encontrar a linha de referência
+  // Localizar índice da linha de referência
   for (let i = 0; i < linhas.length; i++) {
     const inputId = linhas[i].querySelector('input[name="id_etapa_custom[]"]');
     if (inputId && inputId.value.trim() === idRef) {
@@ -715,88 +715,70 @@ function confirmarInsercaoLinhaEspecifica() {
     }
   }
 
-  if (indexRef === -1) {
-    alert('ID de referência não encontrado.');
-    return;
+   if (indexRef === -1) {
+    for (let i = 0; i < linhas.length; i++) {
+      const inputId = linhas[i].querySelector('input[name="id_etapa_custom[]"]');
+      if (!inputId) continue;
+      
+      const valor = inputId.value.trim();
+
+      if (tipo === 'subtitulo' && !valor.includes('.') && parseInt(valor) > parseInt(idRef)) {
+        indexRef = i;
+        break;
+      }
+
+      if (tipo === 'linha' && valor.includes('.')) {
+        const [etapaValor, subValor] = valor.split('.').map(n => parseInt(n));
+        const [refEtapa, refSub] = idRef.split('.').map(n => parseInt(n));
+
+        if (etapaValor > refEtapa || (etapaValor === refEtapa && subValor > refSub)) {
+          indexRef = i;
+          break;
+        }
+      }
+    }
+
+    if (indexRef === -1) {
+      indexRef = linhas.length;
+    }
   }
 
-  // 2. Criar nova linha
-  const novaLinha = document.createElement('tr');
-  const campos = ['etapa', 'inicio_previsto', 'termino_previsto', 'inicio_real', 'termino_real', 'evolutivo'];
-
-  // Celula de ID
-  const idCell = document.createElement('td');
-  const idInput = document.createElement('input');
-  idInput.type = 'text';
-  idInput.name = 'id_etapa_custom[]';
-  idInput.value = idRef;
-  idInput.readOnly = true;
-  idInput.className = 'input-padrao';
-  idInput.style.textAlign = 'center';
-  idCell.appendChild(idInput);
-  novaLinha.appendChild(idCell);
-
-  // Campos
-  campos.forEach((campo, index) => {
-    const cell = document.createElement('td');
-    if (index === 0) {
-      if (tipo === 'subtitulo') {
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.placeholder = 'Título';
-        input.className = 'campo-etapa-subtitulo';
-        input.name = campo + '[]';
-        cell.appendChild(input);
-      } else {
-        const textarea = document.createElement('textarea');
-        textarea.name = campo + '[]';
-        textarea.rows = 2;
-        textarea.className = 'campo-etapa';
-        cell.appendChild(textarea);
-      }
+  // Gerar novo ID com base no tipo
+  const novoId = (() => {
+    if (tipo === 'subtitulo') {
+      const partes = idRef.split('.');
+      const idEtapa = parseInt(partes[0]);
+      return String(idEtapa);
     } else {
-      const input = document.createElement('input');
-      input.name = campo + '[]';
-      input.type = campo === 'evolutivo' ? 'number' : 'date';
-      if (campo === 'evolutivo') {
-        input.min = 0;
-        input.max = 100;
-        input.step = 0.1;
-        input.placeholder = '0 a 100%';
-      }
-      input.className = 'input-padrao';
-      cell.appendChild(input);
+      const partes = idRef.split('.');
+      const idEtapa = parseInt(partes[0]);
+      const subEtapas = linhas
+        .map(linha => linha.querySelector('input[name="id_etapa_custom[]"]')?.value.trim())
+        .filter(id => id?.startsWith(idEtapa + '.') && !isNaN(Number(id.split('.')[1])));
+
+      let maiorSub = 0;
+      subEtapas.forEach(id => {
+        const sub = parseInt(id.split('.')[1]);
+        if (sub > maiorSub) maiorSub = sub;
+      });
+      return `${idEtapa}.${maiorSub + 1}`;
     }
-    novaLinha.appendChild(cell);
+  })();
+
+  // Inserir nova linha antes da linha de referência
+  const novaLinha = linhas[indexRef].cloneNode(true);
+  novaLinha.querySelectorAll('input, textarea').forEach(el => {
+    if (el.name === 'id_etapa_custom[]') {
+      el.value = novoId;
+    } else {
+      el.value = '';
+    }
   });
 
-  // Inputs ocultos
-  const tipoInput = document.createElement('input');
-  tipoInput.type = 'hidden';
-  tipoInput.name = 'tipo_etapa[]';
-  tipoInput.value = tipo;
-  novaLinha.appendChild(tipoInput);
+  table.insertBefore(novaLinha, linhas[indexRef]);
 
-  const idHidden = document.createElement('input');
-  idHidden.type = 'hidden';
-  idHidden.name = 'ids[]';
-  idHidden.value = '';
-  novaLinha.appendChild(idHidden);
-
-  // 3. Inserir a nova linha ANTES da linha de referência
-  const refLinha = table.rows[indexRef];
-  table.insertBefore(novaLinha, refLinha);
-
-  // 4. Só AGORA atualizar os IDs das etapas/subetapas seguintes
-  if (tipo === 'subtitulo') {
-    atualizarIDsEtapas(idRef);
-  } else {
-    atualizarIDsSubetapas(idRef);
-  }
-
-  fecharModalLinhaEspecifica();
-  recalcularUltimoIdEtapa();
-  copiarInicioPrevistoDasSubetapas();
+  // Atualizar os IDs das linhas subsequentes
+  atualizarIDsHierarquicos(table);
 }
 
 function atualizarIDsEtapas(idInserir) {
@@ -830,6 +812,45 @@ function atualizarIDsEtapas(idInserir) {
           inputId.value = `${etapa + 1}.${sub}`;
         }
       }
+    }
+  }
+}
+
+function atualizarIDsHierarquicos(tabela) {
+  const linhas = Array.from(tabela.querySelectorAll('tr'));
+  const ids = linhas.map(linha =>
+    linha.querySelector('input[name="id_etapa_custom[]"]')?.value.trim()
+  );
+
+  // Ordenar os IDs corretamente antes de processar
+  ids.sort((a, b) => {
+    const partesA = a.split('.').map(Number);
+    const partesB = b.split('.').map(Number);
+    for (let i = 0; i < Math.max(partesA.length, partesB.length); i++) {
+      const numA = partesA[i] || 0;
+      const numB = partesB[i] || 0;
+      if (numA !== numB) return numA - numB;
+    }
+    return 0;
+  });
+
+  let etapaAtual = 1;
+  let subEtapaAtual = 1;
+
+  for (let i = 0; i < linhas.length; i++) {
+    const linha = linhas[i];
+    const inputId = linha.querySelector('input[name="id_etapa_custom[]"]');
+    const tipo = linha.querySelector('input[name="tipo_etapa[]"]')?.value;
+
+    if (!inputId) continue;
+
+    if (tipo === 'subtitulo') {
+      inputId.value = String(etapaAtual);
+      subEtapaAtual = 1;
+      etapaAtual++;
+    } else {
+      inputId.value = `${etapaAtual - 1}.${subEtapaAtual}`;
+      subEtapaAtual++;
     }
   }
 }

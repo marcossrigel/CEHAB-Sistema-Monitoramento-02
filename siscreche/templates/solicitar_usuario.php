@@ -32,7 +32,8 @@
         <div class="linha">
           <div class="campo-longo">
             <label for="telefone" class="label">Telefone</label>
-            <input type="text" id="telefone" name="telefone" placeholder="(xx) xxxxx-xxxx" required>
+            <input type="text" id="telefone" name="telefone" placeholder="(81) 99999-9999" required 
+              pattern="\(\d{2}\) \d{5}-\d{4}" title="Formato esperado: (81) 99999-9999">
           </div>
         </div>
 
@@ -42,5 +43,29 @@
       </form>
     </div>
   </main>
+
+  <script>
+document.addEventListener("DOMContentLoaded", function () {
+  const telefoneInput = document.getElementById("telefone");
+
+  telefoneInput.addEventListener("input", function (e) {
+    let valor = telefoneInput.value.replace(/\D/g, "").substring(0, 11); // Só números, máx 11 dígitos
+    const ddd = valor.substring(0, 2);
+    const parte1 = valor.substring(2, 7);
+    const parte2 = valor.substring(7, 11);
+
+    if (valor.length > 7) {
+      telefoneInput.value = `(${ddd}) ${parte1}-${parte2}`;
+    } else if (valor.length > 2) {
+      telefoneInput.value = `(${ddd}) ${parte1}`;
+    } else {
+      telefoneInput.value = `(${ddd}`;
+    }
+  });
+});
+</script>
+
+
 </body>
 </html>
+

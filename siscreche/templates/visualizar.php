@@ -44,10 +44,13 @@ $resultado = $conexao->query($sql);
     ?>
   </h1>
 
+  <?php if ($tipo_usuario === 'comum'): ?>
   <a href="index.php?page=compartilhar&id=<?php echo $id_usuario; ?>" 
      style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); text-decoration: none; background-color: #007bff; color: white; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 14px;">
     👥 Compartilhar
   </a>
+<?php endif; ?>
+
 </div>
 
   <div id="sortable">
@@ -85,10 +88,10 @@ $resultado = $conexao->query($sql);
 
           <div class="acoes">
             <button onclick="window.location.href='index.php?page=acompanhamento&id_iniciativa=<?php echo $row['id']; ?>';">🛠 Acompanhar Pendências</button>
-            <button onclick="window.location.href='infocontratuais.php?id_iniciativa=<?php echo $row['id']; ?>';">📋 Projeto e Licitação</button>
+            <button onclick="window.location.href='index.php?page=projeto_licitacoes&id_iniciativa=<?php echo $row['id']; ?>';">📋 Projeto e Licitação</button>
             <button onclick="window.location.href='index.php?page=info_contratuais&id_iniciativa=<?php echo $row['id']; ?>';">📄 Informações Contratuais</button>
             <button onclick="window.location.href='index.php?page=medicoes&id_iniciativa=<?php echo $row['id']; ?>';">📊 Acompanhamento de Medições</button>
-            <button onclick="window.location.href='index.php?page=cronogramamarcos&id_iniciativa=<?php echo $row['id']; ?>';">📆 Eventograma</button>
+            <button onclick="window.location.href='index.php?page=cronogramamarcos&id_iniciativa=<?php echo $row['id']; ?>';">📆 Cronograma</button>
           </div>
 
         </div>

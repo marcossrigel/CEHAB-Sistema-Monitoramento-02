@@ -21,7 +21,7 @@ $sql_iniciativas = "SELECT id, iniciativa FROM iniciativas WHERE id_usuario = $i
 $res_iniciativas = $conexao->query($sql_iniciativas);
 
 $sql_compartilhados = "
-    SELECT DISTINCT u.nome_usuario, u.id_usuario 
+    SELECT DISTINCT u.nome AS nome_usuario, u.id_usuario 
     FROM compartilhamentos c 
     JOIN usuarios u ON c.id_compartilhado = u.id_usuario 
     WHERE c.id_dono = $id_usuario
