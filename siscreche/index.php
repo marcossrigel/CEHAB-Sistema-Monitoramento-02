@@ -103,7 +103,8 @@ else {
         'deletar_linha' => null, // ou 'vazio.css' se quiser um CSS genérico
         'excluir_linha' => null,
         'marcos_excluir_linha' => null,
-        'excluir_linha_medicoes' => null
+        'excluir_linha_medicoes' => null,
+        'excluir_pendencia' => null
     ];
     if (isset($cssMap[$page])) {
         echo '<link rel="stylesheet" href="assets/css/' . $cssMap[$page] . '">';

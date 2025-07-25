@@ -122,7 +122,10 @@ $dados = mysqli_query($conexao, $sql);
                     <td><input type="date" name="termino_real[]" value="<?= htmlspecialchars($linha['termino_real'] ?? '') ?>"></td>
                     <td><input type="text" name="status[]" value="<?= htmlspecialchars($linha['status'] ?? '') ?>"></td>
                     <td><input type="text" name="observacao[]" value="<?= htmlspecialchars($linha['observacao'] ?? '') ?>"></td>
-                    <td><button type="button" onclick="deletarLinha(<?php echo $linha['id']; ?>)">delete</button></td>
+                    <td>
+                        <button type="button" onclick="inserirAntes(this)">➕</button>
+                        <button type="button" onclick="deletarLinha(<?php echo $linha['id']; ?>)">❌</button>
+                    </td>
                 </tr>
             <?php } ?>
             </tbody>

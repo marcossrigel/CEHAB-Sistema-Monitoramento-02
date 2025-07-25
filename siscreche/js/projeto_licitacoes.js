@@ -1,6 +1,7 @@
-function adicionarLinha() {
+function inserirAntes(botao) {
+    const linhaReferencia = botao.closest('tr');
     const tabela = document.getElementById('medicoes').getElementsByTagName('tbody')[0];
-    const novaLinha = tabela.insertRow();
+    const novaLinha = tabela.insertRow(linhaReferencia.rowIndex - 1);
 
     const campos = [
         { name: 'ordem[]', type: 'text' },
@@ -22,6 +23,25 @@ function adicionarLinha() {
         input.required = false;
         celula.appendChild(input);
     });
+
+    // Coluna de ações (só visual)
+    const celulaAcoes = novaLinha.insertCell();
+    const botaoAdd = document.createElement('button');
+    botaoAdd.type = 'button';
+    botaoAdd.textContent = '➕';
+    botaoAdd.onclick = function () {
+        inserirAntes(botaoAdd);
+    };
+
+    const botaoDelete = document.createElement('button');
+    botaoDelete.type = 'button';
+    botaoDelete.textContent = '❌';
+    botaoDelete.onclick = function () {
+        tabela.removeChild(novaLinha);
+    };
+
+    celulaAcoes.appendChild(botaoAdd);
+    celulaAcoes.appendChild(botaoDelete);
 }
 
 function deletarLinha(id) {
