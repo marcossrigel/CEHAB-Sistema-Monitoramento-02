@@ -103,6 +103,7 @@ $dados = mysqli_query($conexao, $sql);
                     <th>Término Real</th>
                     <th>Status</th>
                     <th>Observação</th>
+                    <th>Ações</th>
                 </tr>
             </thead>
             
@@ -121,6 +122,7 @@ $dados = mysqli_query($conexao, $sql);
                     <td><input type="date" name="termino_real[]" value="<?= htmlspecialchars($linha['termino_real'] ?? '') ?>"></td>
                     <td><input type="text" name="status[]" value="<?= htmlspecialchars($linha['status'] ?? '') ?>"></td>
                     <td><input type="text" name="observacao[]" value="<?= htmlspecialchars($linha['observacao'] ?? '') ?>"></td>
+                    <td><button type="button" onclick="deletarLinha(<?php echo $linha['id']; ?>)">delete</button></td>
                 </tr>
             <?php } ?>
             </tbody>
@@ -128,7 +130,6 @@ $dados = mysqli_query($conexao, $sql);
         </table>
         <div class="buttons">
             <button type="button" onclick="adicionarLinha()">Adicionar Linha</button>
-            <button type="button" onclick="removerLinha()">Excluir Linha</button>
             <button type="submit" name="salvar">Salvar</button>
             <button type="button" onclick="window.location.href='index.php?page=visualizar';">&lt; Voltar</button>
         </div>

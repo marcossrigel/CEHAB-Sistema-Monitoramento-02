@@ -107,28 +107,18 @@ function formatarParaBrasileiro($valor) {
             </thead>
             
             <tbody>
-            <?php $linha_index = 0; while ($linha = mysqli_fetch_assoc($dados)) { ?>
-                <tr data-id="<?php echo $linha['id']; ?>">
-                <input type="hidden" name="ids[]" value="<?php echo $linha['id']; ?>">
-                <td>
-                    <input
-                    type="text"
-                    name="valor_orcamento[]"
-                    value="<?php echo formatarParaBrasileiro($linha['valor_orcamento']); ?>"
-                    <?php echo $linha_index === 0 ? 'required' : ''; ?>
-                    />
+                <?php foreach ($dados as $linha): ?>
+                    <tr data-id="<?= $linha['id'] ?>"></td>
+                    <td><input type="text" name="valor_bm[]" value="<?php echo formatarParaBrasileiro($linha['valor_bm']); ?>" required /></td>
+                    <td><input type="text" name="saldo_obra[]" value="<?php echo formatarParaBrasileiro($linha['saldo_obra']); ?>" /></td>
+                    
+                    <td><input type="text" name="bm[]" value="<?php echo htmlspecialchars($linha['bm']); ?>" /></td>
+                    <td><input type="text" name="numero_processo_sei[]" value="<?php echo htmlspecialchars($linha['numero_processo_sei'] ?? ''); ?>" /></td>
 
-                </td>
-                <td><input type="text" name="valor_bm[]" value="<?php echo formatarParaBrasileiro($linha['valor_bm']); ?>" required /></td>
-                <td><input type="text" name="saldo_obra[]" value="<?php echo formatarParaBrasileiro($linha['saldo_obra']); ?>" /></td>
-                
-                <td><input type="text" name="bm[]" value="<?php echo htmlspecialchars($linha['bm']); ?>" /></td>
-                <td><input type="text" name="numero_processo_sei[]" value="<?php echo htmlspecialchars($linha['numero_processo_sei'] ?? ''); ?>" /></td>
-
-                <td><input type="date" name="data_inicio[]" value="<?php echo htmlspecialchars($linha['data_inicio']); ?>" /></td>
-                <td><input type="date" name="data_fim[]" value="<?php echo htmlspecialchars($linha['data_fim']); ?>" /></td>
-                </tr>
-            <?php $linha_index++; } ?>
+                    <td><input type="date" name="data_inicio[]" value="<?php echo htmlspecialchars($linha['data_inicio']); ?>" /></td>
+                    <td><input type="date" name="data_fim[]" value="<?php echo htmlspecialchars($linha['data_fim']); ?>" /></td>
+                    </tr>
+                <?php endforeach; ?>
             </tbody>
 
         </table>

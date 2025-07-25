@@ -59,6 +59,9 @@ function removerLinha() {
 
     const id = ultimaLinha.getAttribute('data-id');
 
+    // <-- Adicione AQUI:
+    console.log("ID da linha a excluir:", id);
+
     if (id) {
         fetch('excluir_linha_medicoes.php', {
             method: 'POST',

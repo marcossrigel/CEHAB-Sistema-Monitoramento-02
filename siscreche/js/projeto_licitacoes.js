@@ -24,41 +24,28 @@ function adicionarLinha() {
     });
 }
 
-function removerLinha() {
-    const tabela = document.getElementById('medicoes').getElementsByTagName('tbody')[0];
-    const linhas = tabela.getElementsByTagName('tr');
+function deletarLinha(id) {
+    if (!confirm('Tem certeza que deseja excluir esta linha?')) return;
 
-    if (linhas.length === 0) return;
-
-    const ultimaLinha = linhas[linhas.length - 1];
-    const id = ultimaLinha.getAttribute('data-id');
-
-    if (id) {
-        fetch('templates/deletar_linha_projeto.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: 'id=' + encodeURIComponent(id)
-        })
-        .then(response => response.text())
-        .then(data => {
-            if (data.includes('sucesso') || data.includes('ok')) {
-                tabela.removeChild(ultimaLinha);
-            } else {
-                alert('Erro ao excluir: ' + data);
-            }
-        })
-        .catch(error => {
-            alert('Erro de rede: ' + error);
-        });
-    } else {
-        tabela.removeChild(ultimaLinha);
-    }
+    fetch('templates/deletar_linha.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'id=' + encodeURIComponent(id)
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data.includes('sucesso')) {
+            const linha = document.querySelector(`tr[data-id='${id}']`);
+            if (linha) linha.remove();
+        } else {
+            alert('Erro ao excluir: ' + data);
+        }
+    })
+    .catch(error => {
+        alert('Erro de rede: ' + error);
+    });
 }
-
-
-
-
 
 
