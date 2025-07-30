@@ -100,7 +100,7 @@ else {
         'remover_compartilhamento' => 'formulario.css',
         'salvar_compartilhamento' => 'formulario.css',
         'projeto_licitacoes' => 'medicoes.css',
-        'deletar_linha' => null, // ou 'vazio.css' se quiser um CSS genérico
+        'deletar_linha' => null,
         'excluir_linha' => null,
         'marcos_excluir_linha' => null,
         'excluir_linha_medicoes' => null,

@@ -38,6 +38,10 @@ $res_compartilhados = $conexao->query($sql_compartilhados);
         <input type="text" name="usuario" id="usuario" placeholder="Digite o nome do usuário da rede" required>
 
         <h3 style="margin-top: 20px;">Selecione as iniciativas a compartilhar:</h3>
+        <div style="margin: 6px 0;">
+            <input type="checkbox" id="selecionar_tudo">
+            <label for="selecionar_tudo">Selecionar Todas</label>
+        </div>
         <?php if ($res_iniciativas->num_rows > 0): ?>
             <?php while ($linha = $res_iniciativas->fetch_assoc()): ?>
                 <div style="margin: 6px 0;">
@@ -144,6 +148,23 @@ document.querySelectorAll(".btn-remover").forEach(button => {
             });
         }
     });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const selecionarTudo = document.getElementById("selecionar_tudo");
+  const checkboxes = document.querySelectorAll("input[name='iniciativas[]']");
+
+  selecionarTudo.addEventListener("change", function () {
+    checkboxes.forEach(cb => cb.checked = selecionarTudo.checked);
+  });
+
+  // Marcar/desmarcar automaticamente o "Selecionar Tudo" se o usuário alterar manualmente os outros
+  checkboxes.forEach(cb => {
+    cb.addEventListener("change", () => {
+      const todosMarcados = Array.from(checkboxes).every(c => c.checked);
+      selecionarTudo.checked = todosMarcados;
+    });
+  });
 });
 
 </script>

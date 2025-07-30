@@ -33,8 +33,13 @@ $resultado = $conexao->query($sql);
 ?>
 
 <div class="container">
-  <div class="topo-linha" style="position: relative; padding: 20px 0;">
-  <h1 style="text-align: center; margin: 0;">
+
+<div class="top-bar">
+  <div class="top-bar-lado">
+    <a href="index.php?page=home" class="botao-topo">&lt; Voltar</a>
+  </div>
+
+  <h1 class="titulo-topo">
     <?php 
       if ($tipo_usuario === 'admin' && isset($_GET['diretoria'])) {
         echo "Iniciativas da Diretoria: " . htmlspecialchars($_GET['diretoria']);
@@ -44,13 +49,13 @@ $resultado = $conexao->query($sql);
     ?>
   </h1>
 
-  <?php if ($tipo_usuario === 'comum'): ?>
-  <a href="index.php?page=compartilhar&id=<?php echo $id_usuario; ?>" 
-     style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); text-decoration: none; background-color: #007bff; color: white; padding: 8px 14px; border-radius: 6px; font-weight: bold; font-size: 14px;">
-    👥 Compartilhar
-  </a>
-<?php endif; ?>
-
+  <div class="top-bar-lado">
+    <?php if ($tipo_usuario === 'comum'): ?>
+      <a href="index.php?page=compartilhar&id=<?php echo $id_usuario; ?>" class="botao-topo">
+        👥 Compartilhar
+      </a>
+    <?php endif; ?>
+  </div>
 </div>
 
   <div id="sortable">
