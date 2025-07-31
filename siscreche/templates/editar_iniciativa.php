@@ -105,7 +105,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label>Data da Atualização:</label>
         <input type="date" name="data_vistoria" value="<?php echo htmlspecialchars($row['data_vistoria']); ?>">
       </div>
+
+      <div class="campo">
+      <label>Diretoria:</label>
+      <select name="ib_diretoria" required>
+        <option value="">Selecione...</option>
+        <option value="Educacao" <?php if ($row['ib_orgao'] === 'Educacao') echo 'selected'; ?>>Educação</option>
+        <option value="Saude" <?php if ($row['ib_orgao'] === 'Saude') echo 'selected'; ?>>Saúde</option>
+        <option value="Seguranca" <?php if ($row['ib_orgao'] === 'Seguranca') echo 'selected'; ?>>Segurança</option>
+        <option value="Infra Estrategicas" <?php if ($row['ib_orgao'] === 'Infra Estrategicas') echo 'selected'; ?>>Infra Estratégicas</option>
+        <option value="Infra Grandes Obras" <?php if ($row['ib_orgao'] === 'Infra Grandes Obras') echo 'selected'; ?>>Infra Grandes Obras</option>
+        <option value="Social" <?php if ($row['ib_orgao'] === 'Social') echo 'selected'; ?>>Social</option>
+      </select>
     </div>
+  </div>
 
     <div class="linha">
       <div class="campo">

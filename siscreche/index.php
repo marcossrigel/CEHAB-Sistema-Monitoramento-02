@@ -104,7 +104,8 @@ else {
         'excluir_linha' => null,
         'marcos_excluir_linha' => null,
         'excluir_linha_medicoes' => null,
-        'excluir_pendencia' => null
+        'excluir_pendencia' => null,
+        'marcar_concluida' => null
     ];
     if (isset($cssMap[$page])) {
         echo '<link rel="stylesheet" href="assets/css/' . $cssMap[$page] . '">';

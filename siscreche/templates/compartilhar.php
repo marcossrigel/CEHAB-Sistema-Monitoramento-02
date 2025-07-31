@@ -158,7 +158,6 @@ document.addEventListener("DOMContentLoaded", function () {
     checkboxes.forEach(cb => cb.checked = selecionarTudo.checked);
   });
 
-  // Marcar/desmarcar automaticamente o "Selecionar Tudo" se o usuário alterar manualmente os outros
   checkboxes.forEach(cb => {
     cb.addEventListener("change", () => {
       const todosMarcados = Array.from(checkboxes).every(c => c.checked);

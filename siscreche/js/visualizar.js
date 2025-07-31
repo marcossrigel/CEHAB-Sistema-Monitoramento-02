@@ -1,3 +1,16 @@
+function marcarComoConcluida(botao) {
+  const panel = botao.closest(".panel");
+  const accordion = panel.previousElementSibling;
+  accordion.classList.toggle("concluido");
+
+  if (accordion.classList.contains("concluido")) {
+    botao.textContent = "✅ Concluído";
+    botao.style.backgroundColor = "#28a745";
+  } else {
+    botao.textContent = "✔️ Concluída";
+    botao.style.backgroundColor = "";
+  }
+}
 
 const accordions = document.querySelectorAll(".accordion");
 accordions.forEach((acc) => {
@@ -68,3 +81,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+
+function marcarComoConcluida(botao) {
+  const panel = botao.closest(".panel");
+  const accordion = panel.previousElementSibling;
+  const id = accordion.getAttribute("data-id");
+
+  const estaConcluida = accordion.classList.toggle("concluido");
+
+  // Altera o texto do botão
+  botao.textContent = estaConcluida ? "✅ Concluído" : "✔️ Concluída";
+  botao.style.backgroundColor = estaConcluida ? "#28a745" : "";
+
+  // Envia atualização para o backend
+  fetch("index.php?page=marcar_concluida", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: `id=${id}&concluida=${estaConcluida ? 1 : 0}`
+  })
+  .then(res => res.text())
+  .then(data => console.log(data))
+  .catch(err => console.error("Erro ao marcar como concluída:", err));
+}

@@ -34,7 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ib_variacao = $_POST['ib_variacao'];
     $ib_valor_medio = str_replace(['.', ','], ['', '.'], $_POST['ib_valor_medio']);
     $ib_secretaria = $_POST['ib_secretaria'];
-    $ib_orgao = $_POST['ib_orgao'];
+    $ib_orgao = "CEHAB";
+    $ib_diretoria = $_POST['ib_diretoria'];
     $ib_gestor_responsavel = $_POST['ib_gestor_responsavel'];
     $ib_fiscal = $_POST['ib_fiscal'];
     $ib_numero_processo_sei = $_POST['ib_numero_processo_sei'];
@@ -47,13 +48,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     INSERT INTO iniciativas (
         id_usuario, iniciativa, data_vistoria, numero_contrato,
         ib_status, ib_execucao, ib_previsto, ib_variacao,
-        ib_valor_medio, ib_secretaria, ib_orgao,
+        ib_valor_medio, ib_secretaria, ib_diretoria,
         ib_gestor_responsavel, ib_fiscal, ib_numero_processo_sei,
         objeto, informacoes_gerais, observacoes
     ) VALUES (
         '$id_usuario', '$iniciativa', '$data_vistoria', '$numero_contrato',
         '$ib_status', '$ib_execucao', '$ib_previsto', '$ib_variacao',
-        '$ib_valor_medio', '$ib_secretaria', '$ib_orgao',
+        '$ib_valor_medio', '$ib_secretaria', '$ib_diretoria',
         '$ib_gestor_responsavel', '$ib_fiscal', '$ib_numero_processo_sei',
         '$objeto', '$informacoes_gerais', '$observacoes'
     )
@@ -197,9 +198,17 @@ if ($result) {
         <input type="text" name="ib_secretaria" placeholder="Digite a secretaria" value="">
       </div>
       <div class="campo">
-        <label class="label">Órgão</label>
-        <input type="text" name="ib_orgao" value="CEHAB" readonly>
-      </div>
+      <label class="label">Diretoria</label>
+      <select name="ib_diretoria" class="campo" required>
+        <option value="">Selecione...</option>
+        <option value="Seguranca">Segurança</option>
+        <option value="Educacao">Educação</option>
+        <option value="Saude">Saúde</option>
+        <option value="Infra Estrategicas">Infra Estratégicas</option>
+        <option value="Infra Grandes Obras">Infra Grandes Obras</option>
+        <option value="Social">Social</option>
+      </select>
+    </div>
       
       <div class="campo">
         <label class="label">Gestor Responsável</label>

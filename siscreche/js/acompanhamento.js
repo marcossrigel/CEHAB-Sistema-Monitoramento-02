@@ -62,19 +62,26 @@ function addRow() {
 }
 
 function deleteRow() {
-  const table = document.getElementById('spreadsheet').getElementsByTagName('tbody')[0];
-  if (table.rows.length > 0) {
-    const lastRow = table.rows[table.rows.length - 1];
-    const id = lastRow.getAttribute('data-id');
+  const table = document.getElementById("spreadsheet");
+  const tbody = table.querySelector("tbody");
+  const rows = tbody.querySelectorAll("tr");
 
-    if (id) {
-      fetch('excluir_pendencia.php?id=' + id, { method: 'GET' })
-        .then(response => response.text())
-        .then(data => {
-          table.deleteRow(-1);
-        });
-    } else {
-      table.deleteRow(-1);
-    }
+  if (rows.length === 0) return;
+
+  const row = rows[rows.length - 1];
+  const id = row.getAttribute("data-id");
+
+  if (id) {
+    // REMOVENDO O confirm(...)
+    fetch(`index.php?page=excluir_pendencia&id=${id}`)
+      .then(response => response.text())
+      .then(data => {
+        console.log("Resposta:", data);
+        row.remove();
+      })
+      .catch(error => console.error("Erro ao excluir:", error));
+  } else {
+    row.remove(); // Apenas remove visualmente
   }
 }
+
