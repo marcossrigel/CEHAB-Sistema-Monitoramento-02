@@ -52,3 +52,30 @@ input[name="saldo_obra[]"] {
 .buttons button:hover {
     background: #237acc;
 }
+.botao-acao {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  margin: 0 4px;
+  padding: 2px 6px;
+  transition: transform 0.2s ease;
+}
+
+.botao-acao:hover {
+  transform: scale(1.2);
+}
+
+.botao-mais {
+  color: #6a5acd; /* roxo suave */
+}
+
+.botao-menos {
+  color: #ff4d4d; /* vermelho suave */
+}
+
+.celula-acoes {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

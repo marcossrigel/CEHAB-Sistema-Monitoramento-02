@@ -3,7 +3,7 @@ session_start();
 require_once("templates/config.php");
 
 if (isset($_SESSION['id_usuario'])) {
-    $page = $_GET['page'] ?? null;
+    $page = isset($_GET['page']) ? $_GET['page'] : null;
 
     if (!$page) {
         if ($_SESSION["tipo_usuario"] === "admin") {

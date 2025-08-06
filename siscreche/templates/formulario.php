@@ -48,13 +48,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     INSERT INTO iniciativas (
         id_usuario, iniciativa, data_vistoria, numero_contrato,
         ib_status, ib_execucao, ib_previsto, ib_variacao,
-        ib_valor_medio, ib_secretaria, ib_diretoria,
+        ib_valor_medio, ib_secretaria, ib_orgao, ib_diretoria,
         ib_gestor_responsavel, ib_fiscal, ib_numero_processo_sei,
         objeto, informacoes_gerais, observacoes
     ) VALUES (
         '$id_usuario', '$iniciativa', '$data_vistoria', '$numero_contrato',
         '$ib_status', '$ib_execucao', '$ib_previsto', '$ib_variacao',
-        '$ib_valor_medio', '$ib_secretaria', '$ib_diretoria',
+        '$ib_valor_medio', '$ib_secretaria', '$ib_orgao', '$ib_diretoria',
         '$ib_gestor_responsavel', '$ib_fiscal', '$ib_numero_processo_sei',
         '$objeto', '$informacoes_gerais', '$observacoes'
     )

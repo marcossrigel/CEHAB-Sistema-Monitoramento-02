@@ -1,5 +1,5 @@
 <?php
-require_once('../config.php'); // ou ajuste o caminho
+require_once('../config.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $id = intval($_POST['id']);

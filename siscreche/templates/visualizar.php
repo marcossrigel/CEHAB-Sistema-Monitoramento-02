@@ -16,10 +16,8 @@ $tipo_usuario = $_SESSION['tipo_usuario'];
 if ($tipo_usuario === 'admin' && isset($_GET['diretoria'])) {
     $diretoria = $conexao->real_escape_string($_GET['diretoria']);
     $sql = "SELECT * FROM iniciativas 
-        WHERE id_usuario IN (
-          SELECT id_usuario FROM usuarios WHERE diretoria = '$diretoria'
-        )
-        ORDER BY ordem ASC";
+      WHERE ib_diretoria = '$diretoria'
+      ORDER BY ordem ASC";
 } else {
     $sql = "SELECT * FROM iniciativas 
       WHERE id_usuario = $id_usuario 
@@ -117,5 +115,28 @@ $resultado = $conexao->query($sql);
   </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const abertaId = localStorage.getItem('iniciativaAberta');
+  if (abertaId) {
+    const btn = document.querySelector(`.accordion[data-id='${abertaId}']`);
+    const panel = document.getElementById(`panel-${abertaId}`);
+    if (btn && panel) {
+      btn.classList.add('active');
+      panel.style.display = 'block';
+    }
+    localStorage.removeItem('iniciativaAberta');
+  }
+
+  const botoes = document.querySelectorAll('.acoes button');
+  botoes.forEach(botao => {
+    botao.addEventListener('click', function() {
+      const id = this.closest('.item').querySelector('.accordion').dataset.id;
+      localStorage.setItem('iniciativaAberta', id);
+    });
+  });
+});
+</script>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script src="js/visualizar.js"></script>
+

@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     $ib_secretaria = $_POST['ib_secretaria'];
     $ib_orgao = $_POST['ib_orgao'];
+    $ib_diretoria = $_POST['ib_diretoria'];
     $ib_numero_processo_sei = $_POST['ib_numero_processo_sei'];
     $ib_gestor_responsavel = $_POST['ib_gestor_responsavel'];
     $ib_fiscal = $_POST['ib_fiscal'];
@@ -53,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ib_valor_medio = '$ib_valor_medio',
     ib_secretaria = '$ib_secretaria',
     ib_orgao = '$ib_orgao',
+    ib_diretoria = '$ib_diretoria',
     ib_numero_processo_sei = '$ib_numero_processo_sei',
     ib_gestor_responsavel = '$ib_gestor_responsavel',
     ib_fiscal = '$ib_fiscal',
@@ -110,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       <label>Diretoria:</label>
       <select name="ib_diretoria" required>
         <option value="">Selecione...</option>
-        <option value="Educacao" <?php if ($row['ib_orgao'] === 'Educacao') echo 'selected'; ?>>Educação</option>
+        <option value="Educacao" <?php if ($row['ib_diretoria'] === 'Educacao') echo 'selected'; ?>>Educação</option>
         <option value="Saude" <?php if ($row['ib_orgao'] === 'Saude') echo 'selected'; ?>>Saúde</option>
         <option value="Seguranca" <?php if ($row['ib_orgao'] === 'Seguranca') echo 'selected'; ?>>Segurança</option>
         <option value="Infra Estrategicas" <?php if ($row['ib_orgao'] === 'Infra Estrategicas') echo 'selected'; ?>>Infra Estratégicas</option>
@@ -146,7 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       </div>
       <div class="campo">
         <label>Órgão:</label>
-        <input type="text" name="ib_orgao" value="<?php echo htmlspecialchars($row['ib_orgao']); ?>">
+        <input type="text" name="ib_orgao" value="<?php echo htmlspecialchars($row['ib_orgao'] ?? ''); ?>">
       </div>
     </div>
 

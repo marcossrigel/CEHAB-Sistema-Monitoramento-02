@@ -126,10 +126,20 @@ html, body {
     box-sizing: border-box;
     text-align: center;
 }
+th:nth-child(8), td:nth-child(8) {
+    width: 70px;
+    text-align: center;
+}
+textarea {
+  overflow: hidden;
+  min-height: 40px;
+  max-height: 400px;
+  resize: none;
+}
 table {
     width: 100%;
     border-collapse: separate;
-    border-spacing: 8px 15px;
+    border-spacing: 4px 15px; /* antes era 8px */
     table-layout: fixed;          
 }
 th, td {
@@ -226,6 +236,7 @@ textarea {
           <th>Início Real</th>
           <th>Término Real</th>
           <th>% Evolutivo</th>
+          <th>Ações</th>
         </tr>
       </thead>
 
@@ -257,6 +268,10 @@ textarea {
             <td><input type="date" name="inicio_real[]" value="<?php echo $linha['inicio_real']; ?>"></td>
             <td><input type="date" name="termino_real[]" value="<?php echo $linha['termino_real']; ?>"></td>
             <td><input type="number" name="evolutivo[]" value="<?php echo $linha['evolutivo']; ?>" min="0" max="100" step="0.1" placeholder="0 a 100%"></td>
+            <td>
+              <button type="button" class="acao-mais">➕</button>
+              <button type="button" class="acao-menos">➖</button>
+            </td>
             
           </tr>
         <?php } ?>
@@ -277,29 +292,7 @@ textarea {
       }
       ?>
       <button type="button" onclick="window.location.href='index.php?page=visualizar';">&lt; Voltar</button>
-      <button type="button" onclick="abrirModalInserirLinhaEspecifica()">Adicionar Linha Específica</button>
-      <div style="margin-top: 10px;">
-        <input type="text" id="idExcluir" placeholder="ID para excluir (ex: 3.1)" style="padding: 5px; width: 160px;">
-        <button type="button" onclick="excluirLinhaPorId()">Excluir Linha Específica</button>
-      </div>
     
-    </div>
-
-      <div id="modalLinhaEspecifica" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;">
-      <div style="background:#fff; padding:20px; margin:100px auto; width:300px; border-radius:10px; text-align:center;">
-        <h3>Adicionar Linha Específica</h3>
-        <label>Tipo da Linha:</label><br>
-        <select id="tipoLinhaEspecifica">
-          <option value="subtitulo">Etapa</option>
-          <option value="linha">Sub-Etapa</option>
-        </select>
-        <p>Inserir em qual posição?</p>
-        <input type="text" id="idReferenciaLinha" placeholder="Ex: 3 ou 2.1" style="width:100%; padding:6px;">
-        <div style="margin-top:15px;">
-          <button onclick="confirmarInsercaoLinhaEspecifica()">Inserir</button>
-          <button onclick="fecharModalLinhaEspecifica()">Cancelar</button>
-        </div>
-      </div>
     </div>
 
     </div>
@@ -630,56 +623,6 @@ function copiarInicioPrevistoDasSubetapas() {
   });
 }
 
-function excluirLinhaPorId() {
-  const idParaExcluir = document.getElementById('idExcluir').value.trim();
-  if (!idParaExcluir) {
-    alert('Digite um ID válido (ex: 2.1 ou 3)');
-    return;
-  }
-
-  const linhas = document.querySelectorAll('#spreadsheet tbody tr');
-  let linhaEncontrada = false;
-
-  linhas.forEach((linha, index) => {
-    const inputId = linha.querySelector('input[name="id_etapa_custom[]"]');
-    const idBanco = linha.getAttribute('data-id');
-
-    if (inputId && inputId.value.trim() === idParaExcluir) {
-      linhaEncontrada = true;
-
-      if (idBanco) {
-        // Se já existe no banco, exclui via PHP
-        fetch(`templates/marcos_excluir_linha.php?id=${idBanco}`, { method: 'GET' })
-          .then(response => {
-            if (!response.ok) throw new Error('Erro ao excluir no banco');
-            return response.text();
-          })
-          .then(data => {
-            linha.remove();
-            recalcularUltimoIdEtapa();
-            copiarInicioPrevistoDasSubetapas();
-          })
-          .catch(error => {
-            alert('Erro ao excluir no servidor.');
-            console.error(error);
-          });
-      } else {
-        // Só no frontend (ainda não salva)
-        linha.remove();
-        recalcularUltimoIdEtapa();
-        copiarInicioPrevistoDasSubetapas();
-      }
-    }
-  });
-
-  if (!linhaEncontrada) {
-    alert('ID não encontrado.');
-  } else {
-    document.getElementById('idExcluir').value = '';
-  }
-
-}
-
 function abrirModalInserirLinha() {
   document.getElementById('modalInserirLinha').style.display = 'block';
 }
@@ -872,40 +815,6 @@ function atualizarIDsSubetapas(idInserir) {
   }
 }
 
-function abrirModalInserirLinhaEspecifica() {
-  document.getElementById('modalLinhaEspecifica').style.display = 'block';
-}
-
-function fecharModalLinhaEspecifica() {
-  document.getElementById('modalLinhaEspecifica').style.display = 'none';
-  document.getElementById('idReferenciaLinha').value = '';
-}
-
-function inserirLinhaEspecifica(index, tipo, idNovo) {
-  const table = document.querySelector('#spreadsheet tbody');
-  const refLinha = table.rows[index];
-  const novaLinha = refLinha.cloneNode(true);
-
-  novaLinha.querySelectorAll('input, textarea').forEach(input => input.value = '');
-
-  const inputId = novaLinha.querySelector('input[name="id_etapa_custom[]"]');
-  inputId.value = idNovo;
-
-  const tipoInput = novaLinha.querySelector('input[name="tipo_etapa[]"]');
-  tipoInput.value = tipo;
-
-  const campoTexto = novaLinha.querySelector('textarea, input[type="text"]');
-  if (tipo === 'subtitulo') {
-    campoTexto.placeholder = 'Título';
-    campoTexto.className = 'campo-etapa-subtitulo';
-  } else {
-    campoTexto.placeholder = '';
-    campoTexto.className = 'campo-etapa';
-  }
-
-  table.insertBefore(novaLinha, refLinha);
-}
-
 function gerarNovoIdEtapa() {
   return ++ultimoIdEtapa;
 }
@@ -938,5 +847,107 @@ function ordenarLinhasPorId() {
 
   linhas.forEach(linha => tbody.appendChild(linha));
 }
+
+document.addEventListener('click', function(event) {
+  if (event.target.classList.contains('acao-mais')) {
+    const linhaAtual = event.target.closest('tr');
+    const tabela = document.querySelector('#spreadsheet tbody');
+    const idAtual = linhaAtual.querySelector('input[name="id_etapa_custom[]"]').value.trim();
+
+    if (!idAtual.includes('.')) {
+      alert('Este botão serve para inserir subetapas. Clique ao lado de uma subetapa.');
+      return;
+    }
+
+    const [etapaPai, subNum] = idAtual.split('.').map(n => parseInt(n));
+    const novaSub = `${etapaPai}.${subNum + 1}`;
+
+    // Atualiza subetapas abaixo para manter a ordem
+    const linhas = Array.from(tabela.querySelectorAll('tr'));
+    for (let i = linhas.length - 1; i >= 0; i--) {
+      const inputId = linhas[i].querySelector('input[name="id_etapa_custom[]"]');
+      if (!inputId) continue;
+      const valor = inputId.value.trim();
+      if (valor.startsWith(`${etapaPai}.`)) {
+        const [et, sub] = valor.split('.').map(n => parseInt(n));
+        if (sub > subNum) {
+          inputId.value = `${et}.${sub + 1}`;
+        }
+      }
+    }
+
+    // Clona a linha atual, zera os campos e atualiza o ID
+    const novaLinha = linhaAtual.cloneNode(true);
+    novaLinha.querySelectorAll('input, textarea').forEach(el => {
+      if (el.name === 'id_etapa_custom[]') {
+        el.value = novaSub;
+      } else if (el.name !== 'tipo_etapa[]') {
+        el.value = '';
+      }
+    });
+
+    tabela.insertBefore(novaLinha, linhaAtual.nextSibling);
+  }
+});
+
+document.addEventListener('click', function(event) {
+  if (event.target.classList.contains('acao-menos')) {
+    const linhaAtual = event.target.closest('tr');
+    const tabela = document.querySelector('#spreadsheet tbody');
+    const idInput = linhaAtual.querySelector('input[name="id_etapa_custom[]"]');
+
+    if (!idInput) return;
+
+    const idValor = idInput.value.trim();
+
+    // Só pode remover subetapas (com ponto) e que não terminam com ".1"
+    if (!idValor.includes('.') || idValor.endsWith('.1')) {
+      alert('Esta subetapa não pode ser removida.');
+      return;
+    }
+
+    const [etapaPai, subAtual] = idValor.split('.').map(n => parseInt(n));
+
+    // Remove a linha
+    tabela.removeChild(linhaAtual);
+
+    // Reordenar as subetapas abaixo
+    const linhas = Array.from(tabela.querySelectorAll('tr'));
+    for (let i = 0; i < linhas.length; i++) {
+      const idInputLinha = linhas[i].querySelector('input[name="id_etapa_custom[]"]');
+      if (!idInputLinha) continue;
+
+      const valor = idInputLinha.value.trim();
+
+      if (valor.startsWith(`${etapaPai}.`)) {
+        const [et, sub] = valor.split('.').map(n => parseInt(n));
+        if (sub > subAtual) {
+          idInputLinha.value = `${et}.${sub - 1}`;
+        }
+      }
+    }
+
+    // Atualizar contador local
+    if (subEtapasPorEtapa[etapaPai]) {
+      subEtapasPorEtapa[etapaPai]--;
+    }
+  }
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+  const textareas = document.querySelectorAll("textarea");
+
+  textareas.forEach(textarea => {
+    // Ajusta inicialmente com base no conteúdo carregado
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+
+    // Ajusta dinamicamente quando o usuário digita
+    textarea.addEventListener("input", function() {
+      this.style.height = "auto";
+      this.style.height = this.scrollHeight + "px";
+    });
+  });
+});
 
 </script>

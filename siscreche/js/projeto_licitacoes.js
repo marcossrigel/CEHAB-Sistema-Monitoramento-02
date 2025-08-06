@@ -24,8 +24,60 @@ function inserirAntes(botao) {
         celula.appendChild(input);
     });
 
-    // Coluna de ações (só visual)
+    // Coluna de ações
     const celulaAcoes = novaLinha.insertCell();
+
+    const botaoAdd = document.createElement('button');
+    botaoAdd.type = 'button';
+    botaoAdd.innerHTML = '➕';
+    botaoAdd.className = 'botao-acao botao-mais';
+    
+    botaoAdd.onclick = function () {
+        inserirAntes(botaoAdd);
+    };
+    botaoAdd.onclick = function () {
+        inserirAntes(botaoAdd);
+    };
+
+    const botaoDelete = document.createElement('button');
+    botaoDelete.type = 'button';
+    botaoDelete.innerHTML = '❌';
+    botaoDelete.className = 'botao-acao botao-menos';
+    botaoDelete.onclick = function () {
+        tabela.removeChild(novaLinha);
+    };
+
+    celulaAcoes.appendChild(botaoAdd);
+    celulaAcoes.appendChild(botaoDelete);
+}
+
+function adicionarLinha() {
+    const tabela = document.getElementById('medicoes').getElementsByTagName('tbody')[0];
+    const novaLinha = tabela.insertRow();
+
+    const campos = [
+        { name: 'ordem[]', type: 'text' },
+        { name: 'etapa[]', type: 'text' },
+        { name: 'responsavel[]', type: 'text' },
+        { name: 'inicio_previsto[]', type: 'date' },
+        { name: 'termino_previsto[]', type: 'date' },
+        { name: 'inicio_real[]', type: 'date' },
+        { name: 'termino_real[]', type: 'date' },
+        { name: 'status[]', type: 'text' },
+        { name: 'observacao[]', type: 'text' }
+    ];
+
+    campos.forEach(campo => {
+        const celula = novaLinha.insertCell();
+        const input = document.createElement('input');
+        input.name = campo.name;
+        input.type = campo.type;
+        input.required = false;
+        celula.appendChild(input);
+    });
+
+    const celulaAcoes = novaLinha.insertCell();
+
     const botaoAdd = document.createElement('button');
     botaoAdd.type = 'button';
     botaoAdd.textContent = '➕';
@@ -67,5 +119,3 @@ function deletarLinha(id) {
         alert('Erro de rede: ' + error);
     });
 }
-
-
