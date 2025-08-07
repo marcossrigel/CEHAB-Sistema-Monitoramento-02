@@ -91,6 +91,8 @@ function formatarParaBrasileiro($valor) {
 }
 ?>
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 <style>
 :root {
     --color-dark: #1d2129;
@@ -104,6 +106,12 @@ html, body {
     font-family: 'Poppins', sans-serif;
     background: #e3e8ec;
     min-height: 100vh;
+}
+.botoes-acoes {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px; /* espaçamento entre os botões */
 }
 .table-container {
     width: 95%;
@@ -197,6 +205,35 @@ input[type="date"] {
 textarea {
     resize: vertical; 
 }
+.btn-acao {
+  background-color: white;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  margin: 0 2px;
+}
+
+.btn-acao i {
+  pointer-events: none;
+}
+
+.acao-mais i {
+  color: #6f42c1; /* Roxo */
+}
+
+.acao-menos i {
+  color: #e74c3c; /* Vermelho */
+}
+
+.btn-acao:hover {
+  background-color: #f5f5f5;
+  border-color: #999;
+  transform: scale(1.1);
+}
+
 @media (max-width: 768px) {
     .main-title {
         font-size: 20px;
@@ -269,10 +306,15 @@ textarea {
             <td><input type="date" name="termino_real[]" value="<?php echo $linha['termino_real']; ?>"></td>
             <td><input type="number" name="evolutivo[]" value="<?php echo $linha['evolutivo']; ?>" min="0" max="100" step="0.1" placeholder="0 a 100%"></td>
             <td>
-              <button type="button" class="acao-mais">➕</button>
-              <button type="button" class="acao-menos">➖</button>
-            </td>
-            
+            <div class="botoes-acoes">
+              <button type="button" class="acao-mais btn-acao" title="Adicionar Subetapa">
+                <i class="fas fa-plus"></i>
+              </button>
+              <button type="button" class="acao-menos btn-acao" title="Remover Subetapa">
+                <i class="fas fa-minus"></i>
+              </button>
+            </div>
+          </td>
           </tr>
         <?php } ?>
       </tbody>
