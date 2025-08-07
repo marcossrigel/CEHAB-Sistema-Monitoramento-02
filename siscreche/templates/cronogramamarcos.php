@@ -891,69 +891,73 @@ function ordenarLinhasPorId() {
 }
 
 document.addEventListener('click', function(event) {
-  if (!event.target.closest('.acao-mais')) return;
+  const botaoMais = event.target.closest('.acao-mais');
+  if (!botaoMais) return;
 
-  const linhaAtual = event.target.closest('tr');
+  const linhaAtual = botaoMais.closest('tr');
   const tabela = document.querySelector('#spreadsheet tbody');
   const idAtual = linhaAtual.querySelector('input[name="id_etapa_custom[]"]').value.trim();
 
-  // Só permite adicionar subetapas se for um número inteiro (ou seja, uma etapa)
-  if (idAtual.includes('.')) {
-    alert('Este botão só funciona em etapas (ex: 1, 2...).');
-    return;
-  }
+  if (!idAtual) return;
 
-  const etapaPai = parseInt(idAtual);
-
-  // Encontra a próxima subetapa disponível (ex: 1.1, 1.2, ...)
-  let maiorSub = 0;
   const linhas = Array.from(tabela.querySelectorAll('tr'));
 
-  linhas.forEach(linha => {
-    const id = linha.querySelector('input[name="id_etapa_custom[]"]').value.trim();
-    if (id.startsWith(etapaPai + '.')) {
-      const partes = id.split('.');
-      const sub = parseInt(partes[1]);
-      if (sub > maiorSub) maiorSub = sub;
+  if (!idAtual.includes('.')) {
+    // Caso seja uma ETAPA (ex: 1), usar lógica de adicionar última subetapa (como antes)
+    const etapaPai = parseInt(idAtual);
+    let maiorSub = 0;
+
+    linhas.forEach(linha => {
+      const id = linha.querySelector('input[name="id_etapa_custom[]"]').value.trim();
+      if (id.startsWith(etapaPai + '.')) {
+        const partes = id.split('.');
+        const sub = parseInt(partes[1]);
+        if (sub > maiorSub) maiorSub = sub;
+      }
+    });
+
+    const novoId = `${etapaPai}.${maiorSub + 1}`;
+
+    const novaLinha = criarLinhaSubetapa(novoId);
+    let indexInsercao = linhas.findIndex(l => 
+      l.querySelector('input[name="id_etapa_custom[]"]').value.trim() === idAtual
+    ) + 1;
+
+    for (; indexInsercao < linhas.length; indexInsercao++) {
+      const id = linhas[indexInsercao].querySelector('input[name="id_etapa_custom[]"]').value.trim();
+      if (!id.startsWith(etapaPai + '.')) break;
     }
-  });
 
-  const novoId = `${etapaPai}.${maiorSub + 1}`;
+    tabela.insertBefore(novaLinha, tabela.rows[indexInsercao]);
+  } else {
+    // Caso seja SUBETAPA (ex: 1.1), vamos inserir entre ela e as próximas
+    const [etapaPai, subAtual] = idAtual.split('.').map(n => parseInt(n));
+    const novoSub = subAtual + 1;
 
-  // Criar nova linha de subetapa
-  const novaLinha = document.createElement('tr');
-  novaLinha.innerHTML = `
-    <td><input type="text" name="id_etapa_custom[]" value="${novoId}" readonly class="input-padrao"></td>
-    <td><textarea name="etapa[]" rows="2" class="campo-etapa"></textarea>
-        <input type="hidden" name="ids[]" value="">
-        <input type="hidden" name="tipo_etapa[]" value="linha">
-    </td>
-    <td><input type="date" name="inicio_previsto[]" class="input-padrao"></td>
-    <td><input type="date" name="termino_previsto[]" class="input-padrao"></td>
-    <td><input type="date" name="inicio_real[]" class="input-padrao"></td>
-    <td><input type="date" name="termino_real[]" class="input-padrao"></td>
-    <td><input type="number" name="evolutivo[]" class="input-padrao" min="0" max="100" step="0.1" placeholder="0 a 100%"></td>
-    <td>
-      <div class="botoes-acoes">
-        <button type="button" class="acao-mais btn-acao" title="Adicionar Subetapa"><i class="fas fa-plus"></i></button>
-        <button type="button" class="acao-menos btn-acao" title="Remover Subetapa"><i class="fas fa-minus"></i></button>
-      </div>
-    </td>
-  `;
+    // Reordenar subetapas abaixo
+    for (let i = linhas.length - 1; i >= 0; i--) {
+      const inputId = linhas[i].querySelector('input[name="id_etapa_custom[]"]');
+      if (!inputId) continue;
+      const id = inputId.value.trim();
+      if (id.startsWith(`${etapaPai}.`)) {
+        const [et, sub] = id.split('.').map(n => parseInt(n));
+        if (sub >= novoSub) {
+          inputId.value = `${et}.${sub + 1}`;
+        }
+      }
+    }
 
-  // Inserir nova subetapa logo após a última subetapa dessa etapa
-  let indexInsercao = linhas.findIndex(l => 
-    l.querySelector('input[name="id_etapa_custom[]"]').value.trim() === idAtual
-  ) + 1;
+    // Inserir nova subetapa entre
+    const novoId = `${etapaPai}.${novoSub}`;
+    const novaLinha = criarLinhaSubetapa(novoId);
 
-  for (; indexInsercao < linhas.length; indexInsercao++) {
-    const id = linhas[indexInsercao].querySelector('input[name="id_etapa_custom[]"]').value.trim();
-    if (!id.startsWith(etapaPai + '.')) break;
+    const indexAtual = linhas.findIndex(l => 
+      l.querySelector('input[name="id_etapa_custom[]"]').value.trim() === idAtual
+    );
+
+    tabela.insertBefore(novaLinha, tabela.rows[indexAtual + 1]);
   }
-
-  tabela.insertBefore(novaLinha, tabela.rows[indexInsercao]);
 });
-
 
 document.addEventListener('click', function(event) {
   if (event.target.classList.contains('acao-menos')) {
@@ -1014,5 +1018,28 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   });
 });
+
+function criarLinhaSubetapa(novoId) {
+  const novaLinha = document.createElement('tr');
+  novaLinha.innerHTML = `
+    <td><input type="text" name="id_etapa_custom[]" value="${novoId}" readonly class="input-padrao"></td>
+    <td><textarea name="etapa[]" rows="2" class="campo-etapa"></textarea>
+        <input type="hidden" name="ids[]" value="">
+        <input type="hidden" name="tipo_etapa[]" value="linha">
+    </td>
+    <td><input type="date" name="inicio_previsto[]" class="input-padrao"></td>
+    <td><input type="date" name="termino_previsto[]" class="input-padrao"></td>
+    <td><input type="date" name="inicio_real[]" class="input-padrao"></td>
+    <td><input type="date" name="termino_real[]" class="input-padrao"></td>
+    <td><input type="number" name="evolutivo[]" class="input-padrao" min="0" max="100" step="0.1" placeholder="0 a 100%"></td>
+    <td>
+      <div class="botoes-acoes">
+        <button type="button" class="acao-mais btn-acao" title="Adicionar Subetapa"><i class="fas fa-plus"></i></button>
+        <button type="button" class="acao-menos btn-acao" title="Remover Subetapa"><i class="fas fa-minus"></i></button>
+      </div>
+    </td>
+  `;
+  return novaLinha;
+}
 
 </script>
