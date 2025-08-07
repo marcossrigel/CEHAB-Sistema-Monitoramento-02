@@ -1,3 +1,27 @@
+function criarCelulaAcoes(tr) {
+    const celulaAcoes = tr.insertCell();
+    celulaAcoes.className = 'celula-acoes';
+
+    const botaoAdd = document.createElement('button');
+    botaoAdd.type = 'button';
+    botaoAdd.innerHTML = '➕';
+    botaoAdd.className = 'botao-acao botao-mais';
+    botaoAdd.onclick = function () {
+        inserirAntes(botaoAdd);
+    };
+
+    const botaoDelete = document.createElement('button');
+    botaoDelete.type = 'button';
+    botaoDelete.innerHTML = '❌';
+    botaoDelete.className = 'botao-acao botao-menos';
+    botaoDelete.onclick = function () {
+        tr.remove();
+    };
+
+    celulaAcoes.appendChild(botaoAdd);
+    celulaAcoes.appendChild(botaoDelete);
+}
+
 function inserirAntes(botao) {
     const linhaReferencia = botao.closest('tr');
     const tabela = document.getElementById('medicoes').getElementsByTagName('tbody')[0];
@@ -24,31 +48,7 @@ function inserirAntes(botao) {
         celula.appendChild(input);
     });
 
-    // Coluna de ações
-    const celulaAcoes = novaLinha.insertCell();
-
-    const botaoAdd = document.createElement('button');
-    botaoAdd.type = 'button';
-    botaoAdd.innerHTML = '➕';
-    botaoAdd.className = 'botao-acao botao-mais';
-    
-    botaoAdd.onclick = function () {
-        inserirAntes(botaoAdd);
-    };
-    botaoAdd.onclick = function () {
-        inserirAntes(botaoAdd);
-    };
-
-    const botaoDelete = document.createElement('button');
-    botaoDelete.type = 'button';
-    botaoDelete.innerHTML = '❌';
-    botaoDelete.className = 'botao-acao botao-menos';
-    botaoDelete.onclick = function () {
-        tabela.removeChild(novaLinha);
-    };
-
-    celulaAcoes.appendChild(botaoAdd);
-    celulaAcoes.appendChild(botaoDelete);
+    criarCelulaAcoes(novaLinha);
 }
 
 function adicionarLinha() {
@@ -76,24 +76,7 @@ function adicionarLinha() {
         celula.appendChild(input);
     });
 
-    const celulaAcoes = novaLinha.insertCell();
-
-    const botaoAdd = document.createElement('button');
-    botaoAdd.type = 'button';
-    botaoAdd.textContent = '➕';
-    botaoAdd.onclick = function () {
-        inserirAntes(botaoAdd);
-    };
-
-    const botaoDelete = document.createElement('button');
-    botaoDelete.type = 'button';
-    botaoDelete.textContent = '❌';
-    botaoDelete.onclick = function () {
-        tabela.removeChild(novaLinha);
-    };
-
-    celulaAcoes.appendChild(botaoAdd);
-    celulaAcoes.appendChild(botaoDelete);
+    criarCelulaAcoes(novaLinha);
 }
 
 function deletarLinha(id) {

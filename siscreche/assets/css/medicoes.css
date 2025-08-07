@@ -1,6 +1,6 @@
 body { font-family: Arial; background: #f1f1f1; }
 .container {
-    max-width: 75%;
+    max-width: 80%;
     margin: auto;
     padding: 20px;
     background: white;
@@ -36,6 +36,23 @@ input[name="saldo_obra[]"] {
     min-width: 150px;
 }
 
+td:last-child {
+  white-space: nowrap;
+}
+
+td:last-child button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 4px;
+  font-size: 16px;
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+}
 .buttons {
     text-align: center;
     margin-top: 10px;

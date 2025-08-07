@@ -1,19 +1,21 @@
 <?php
-require_once('../config.php');
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+require_once __DIR__ . '/config.php';
+
+mysqli_set_charset($conexao, "utf8mb4");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
     $id = intval($_POST['id']);
-    $stmt = $conexao->prepare("DELETE FROM projeto_licitacoes WHERE id = ?");
-    $stmt->bind_param("i", $id);
 
-    if ($stmt->execute()) {
-        echo "sucesso";
+    $query = "DELETE FROM projeto_licitacoes WHERE id = $id";
+    if (mysqli_query($conexao, $query)) {
+        echo 'sucesso';
     } else {
-        echo "erro: " . $stmt->error;
+        echo 'erro ao excluir: ' . mysqli_error($conexao);
     }
-
-    $stmt->close();
-    $conexao->close();
 } else {
-    echo "requisicao invalida";
+    echo 'id inválido';
 }

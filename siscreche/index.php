@@ -105,6 +105,7 @@ else {
         'marcos_excluir_linha' => null,
         'excluir_linha_medicoes' => null,
         'excluir_pendencia' => null,
+        'deletar_linha' => null,
         'marcar_concluida' => null
     ];
     if (isset($cssMap[$page])) {
