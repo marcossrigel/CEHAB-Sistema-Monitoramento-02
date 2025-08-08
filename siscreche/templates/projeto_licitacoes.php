@@ -9,60 +9,86 @@ mysqli_set_charset($conexao, "utf8mb4");
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
+if (!isset($_SESSION['id_usuario'])) {
+    header('Location: login.php'); exit;
+}
 
-$id_usuario = $_SESSION['id_usuario'] ?? 0;
-$id_iniciativa = $_GET['id_iniciativa'] ?? 0;
+$id_usuario_logado = (int)($_SESSION['id_usuario'] ?? 0);
+$id_iniciativa     = isset($_GET['id_iniciativa']) ? (int)$_GET['id_iniciativa'] : 0;
 
+// ---- Resolve DONO e valida permissão ----
+$stmt = $conexao->prepare("SELECT id_usuario AS id_dono, iniciativa FROM iniciativas WHERE id = ?");
+$stmt->bind_param("i", $id_iniciativa);
+$stmt->execute();
+$res = $stmt->get_result();
+$ini = $res->fetch_assoc();
+if (!$ini) { die("Iniciativa não encontrada."); }
+$id_dono = (int)$ini['id_dono'];
+$nome_iniciativa = $ini['iniciativa'] ?? 'Iniciativa Desconhecida';
+
+$temAcesso = ($id_usuario_logado === $id_dono);
+if (!$temAcesso) {
+  $stmt = $conexao->prepare("
+    SELECT 1 FROM compartilhamentos
+    WHERE id_dono = ? AND id_compartilhado = ? AND id_iniciativa = ?
+    LIMIT 1
+  ");
+  $stmt->bind_param("iii", $id_dono, $id_usuario_logado, $id_iniciativa);
+  $stmt->execute();
+  $temAcesso = (bool)$stmt->get_result()->fetch_row();
+}
+if (!$temAcesso) { die("Sem permissão para acessar esta iniciativa."); }
+
+// ---- SALVAR (continua igual, mas agora com permissão garantida) ----
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['etapa'])) {
-    $ids = $_POST['ids'] ?? [];
-    $ordens = $_POST['ordem'] ?? [];
-    $etapas = $_POST['etapa'] ?? [];
-    $responsaveis = $_POST['responsavel'] ?? [];
-    $inicio_previsto = $_POST['inicio_previsto'] ?? [];
+    $ids              = $_POST['ids'] ?? [];
+    $ordens           = $_POST['ordem'] ?? [];
+    $etapas           = $_POST['etapa'] ?? [];
+    $responsaveis     = $_POST['responsavel'] ?? [];
+    $inicio_previsto  = $_POST['inicio_previsto'] ?? [];
     $termino_previsto = $_POST['termino_previsto'] ?? [];
-    $inicio_real = $_POST['inicio_real'] ?? [];
-    $termino_real = $_POST['termino_real'] ?? [];
-    $status = $_POST['status'] ?? [];
-    $observacoes = $_POST['observacao'] ?? [];
+    $inicio_real      = $_POST['inicio_real'] ?? [];
+    $termino_real     = $_POST['termino_real'] ?? [];
+    $status           = $_POST['status'] ?? [];
+    $observacoes      = $_POST['observacao'] ?? [];
 
     for ($i = 0; $i < count($etapas); $i++) {
-        $id = $ids[$i] ?? null;
+        $id = isset($ids[$i]) ? (int)$ids[$i] : 0;
 
-        $ordem = !empty($ordens[$i]) ? "'" . mysqli_real_escape_string($conexao, $ordens[$i]) . "'" : "NULL";
-        $etapa = !empty($etapas[$i]) ? "'" . mysqli_real_escape_string($conexao, $etapas[$i]) . "'" : "NULL";
-        $responsavel = !empty($responsaveis[$i]) ? "'" . mysqli_real_escape_string($conexao, $responsaveis[$i]) . "'" : "NULL";
-        $status_val = !empty($status[$i]) ? "'" . mysqli_real_escape_string($conexao, $status[$i]) . "'" : "NULL";
-        $obs = !empty($observacoes[$i]) ? "'" . mysqli_real_escape_string($conexao, $observacoes[$i]) . "'" : "NULL";
+        $ordem        = ($ordens[$i]        ?? '') !== '' ? "'".mysqli_real_escape_string($conexao,$ordens[$i])."'"        : "NULL";
+        $etapa        = ($etapas[$i]        ?? '') !== '' ? "'".mysqli_real_escape_string($conexao,$etapas[$i])."'"        : "NULL";
+        $responsavel  = ($responsaveis[$i]  ?? '') !== '' ? "'".mysqli_real_escape_string($conexao,$responsaveis[$i])."'"  : "NULL";
+        $status_val   = ($status[$i]        ?? '') !== '' ? "'".mysqli_real_escape_string($conexao,$status[$i])."'"        : "NULL";
+        $obs          = ($observacoes[$i]   ?? '') !== '' ? "'".mysqli_real_escape_string($conexao,$observacoes[$i])."'"   : "NULL";
 
-        $prev_inicio = !empty($inicio_previsto[$i]) ? "'" . mysqli_real_escape_string($conexao, $inicio_previsto[$i]) . "'" : "NULL";
-        $prev_fim = !empty($termino_previsto[$i]) ? "'" . mysqli_real_escape_string($conexao, $termino_previsto[$i]) . "'" : "NULL";
-        $real_inicio = !empty($inicio_real[$i]) ? "'" . mysqli_real_escape_string($conexao, $inicio_real[$i]) . "'" : "NULL";
-        $real_fim = !empty($termino_real[$i]) ? "'" . mysqli_real_escape_string($conexao, $termino_real[$i]) . "'" : "NULL";
+        $prev_inicio  = ($inicio_previsto[$i]  ?? '') !== '' ? "'".mysqli_real_escape_string($conexao,$inicio_previsto[$i])."'"  : "NULL";
+        $prev_fim     = ($termino_previsto[$i] ?? '') !== '' ? "'".mysqli_real_escape_string($conexao,$termino_previsto[$i])."'" : "NULL";
+        $real_inicio  = ($inicio_real[$i]      ?? '') !== '' ? "'".mysqli_real_escape_string($conexao,$inicio_real[$i])."'"      : "NULL";
+        $real_fim     = ($termino_real[$i]     ?? '') !== '' ? "'".mysqli_real_escape_string($conexao,$termino_real[$i])."'"     : "NULL";
 
-
-        if ($id) {
+        if ($id > 0) {
+            // Segurança: atualiza apenas a linha da mesma iniciativa
             $sql = "UPDATE projeto_licitacoes SET 
-            ordem = $ordem,
-            etapa = $etapa,
-            responsavel = $responsavel,
-            inicio_previsto = $prev_inicio,
-            termino_previsto = $prev_fim,
-            inicio_real = $real_inicio,
-            termino_real = $real_fim,
-            status = $status_val,
-            observacao = $obs
-            WHERE id = $id";
+                ordem = $ordem,
+                etapa = $etapa,
+                responsavel = $responsavel,
+                inicio_previsto = $prev_inicio,
+                termino_previsto = $prev_fim,
+                inicio_real = $real_inicio,
+                termino_real = $real_fim,
+                status = $status_val,
+                observacao = $obs
+            WHERE id = $id AND id_iniciativa = $id_iniciativa";
         } else {
             $sql = "INSERT INTO projeto_licitacoes (
-            id_iniciativa, ordem, etapa, responsavel,
-            inicio_previsto, termino_previsto,
-            inicio_real, termino_real, status, observacao
-        ) VALUES (
-            $id_iniciativa, $ordem, $etapa, $responsavel,
-            $prev_inicio, $prev_fim,
-            $real_inicio, $real_fim, $status_val, $obs
-        )";
-
+                id_iniciativa, ordem, etapa, responsavel,
+                inicio_previsto, termino_previsto,
+                inicio_real, termino_real, status, observacao
+            ) VALUES (
+                $id_iniciativa, $ordem, $etapa, $responsavel,
+                $prev_inicio, $prev_fim,
+                $real_inicio, $real_fim, $status_val, $obs
+            )";
         }
 
         mysqli_query($conexao, $sql);
@@ -72,18 +98,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['etapa'])) {
     exit;
 }
 
-$sql_iniciativa = "SELECT iniciativa FROM iniciativas WHERE id = $id_iniciativa";
-$res_iniciativa = mysqli_query($conexao, $sql_iniciativa);
-$nome_iniciativa = '';
-
-if ($res_iniciativa && $row = mysqli_fetch_assoc($res_iniciativa)) {
-    $nome_iniciativa = $row['iniciativa'];
-} else {
-    $nome_iniciativa = "Iniciativa Desconhecida";
-}
-
-$sql = "SELECT * FROM projeto_licitacoes WHERE id_iniciativa = $id_iniciativa";
+$sql = "
+  SELECT * FROM projeto_licitacoes
+  WHERE id_iniciativa = $id_iniciativa
+  ORDER BY 
+    CASE WHEN ordem REGEXP '^[0-9]+$' THEN CAST(ordem AS UNSIGNED) ELSE 999999 END,
+    ordem, id
+";
 $dados = mysqli_query($conexao, $sql);
+
+// Nome da iniciativa (já resolvido acima)
+$nome_iniciativa = htmlspecialchars($nome_iniciativa);
 ?>
 
 <div class="container">

@@ -1,61 +1,89 @@
 <?php
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
+  session_start();
+}
 if (!isset($_SESSION['id_usuario'])) {
   header('Location: login.php');
   exit;
 }
 
 include_once('config.php');
+mysqli_set_charset($conexao, "utf8mb4");
 
-$id_iniciativa = isset($_GET['id_iniciativa']) ? intval($_GET['id_iniciativa']) : 0;
+$id_iniciativa     = isset($_GET['id_iniciativa']) ? (int)$_GET['id_iniciativa'] : 0;
+$id_usuario_logado = (int)($_SESSION['id_usuario'] ?? 0);
+
+$stmt = $conexao->prepare("SELECT id_usuario AS id_dono, iniciativa FROM iniciativas WHERE id = ?");
+$stmt->bind_param("i", $id_iniciativa);
+$stmt->execute();
+$res = $stmt->get_result();
+$ini = $res->fetch_assoc();
+if (!$ini) { die("Iniciativa não encontrada."); }
+$id_dono = (int)$ini['id_dono'];
+$nome_iniciativa = $ini['iniciativa'] ?? 'Iniciativa Desconhecida';
+
+$temAcesso = ($id_usuario_logado === $id_dono);
+if (!$temAcesso) {
+  $stmt = $conexao->prepare("
+    SELECT 1 FROM compartilhamentos
+    WHERE id_dono = ? AND id_compartilhado = ? AND id_iniciativa = ?
+    LIMIT 1
+  ");
+  $stmt->bind_param("iii", $id_dono, $id_usuario_logado, $id_iniciativa);
+  $stmt->execute();
+  $temAcesso = (bool)$stmt->get_result()->fetch_row();
+}
+if (!$temAcesso) { die("Sem permissão para acessar esta iniciativa."); }
 
 if (isset($_POST['salvar'])) {
-    $id_usuario = $_SESSION['id_usuario'];
-    $id_iniciativa = intval($_GET['id_iniciativa']);
+  $problemas      = $_POST['problema']      ?? [];
+  $contramedidas  = $_POST['contramedida']  ?? [];
+  $prazos         = $_POST['prazo']         ?? [];
+  $responsaveis   = $_POST['responsavel']   ?? [];
+  $ids            = $_POST['ids']           ?? [];
 
-    $problemas = $_POST['problema'];
-    $contramedidas = $_POST['contramedida'];
-    $prazos = $_POST['prazo'];
-    $responsaveis = $_POST['responsavel'];
-    $ids = $_POST['ids'] ?? [];
+  for ($i = 0; $i < count($problemas); $i++) {
+    $id_existente = (int)($ids[$i] ?? 0);
+    $problema     = mysqli_real_escape_string($conexao, $problemas[$i] ?? '');
+    $contramedida = mysqli_real_escape_string($conexao, $contramedidas[$i] ?? '');
+    $responsavel  = mysqli_real_escape_string($conexao, $responsaveis[$i] ?? '');
 
-    for ($i = 0; $i < count($problemas); $i++) {
-        $id_existente = intval($ids[$i] ?? 0);
-        $problema = mysqli_real_escape_string($conexao, $problemas[$i]);
-        $contramedida = mysqli_real_escape_string($conexao, $contramedidas[$i]);
-        $prazo_bruto = trim($prazos[$i]);
-        $responsavel = mysqli_real_escape_string($conexao, $responsaveis[$i]);
+    $prazo_bruto  = trim($prazos[$i] ?? '');
+    $prazo_sql    = $prazo_bruto === '' ? "NULL" : "'" . mysqli_real_escape_string($conexao, $prazo_bruto) . "'";
 
-        if ($prazo_bruto === '') {
-            $prazo_sql = "NULL";
-        } else {
-            $prazo_formatado = mysqli_real_escape_string($conexao, $prazo_bruto);
-            $prazo_sql = "'$prazo_formatado'";
-        }
-
-        if ($id_existente > 0) {
-            $query = "UPDATE pendencias 
-                      SET problema='$problema', contramedida='$contramedida', prazo=$prazo_sql, responsavel='$responsavel' 
-                      WHERE id = $id_existente AND id_usuario = $id_usuario AND id_iniciativa = $id_iniciativa";
-        } else {
-            $query = "INSERT INTO pendencias (id_usuario, id_iniciativa, problema, contramedida, prazo, responsavel) 
-                      VALUES ('$id_usuario', '$id_iniciativa', '$problema', '$contramedida', $prazo_sql, '$responsavel')";
-        }
-
-        mysqli_query($conexao, $query);
+    if ($id_existente > 0) {
+      $query = "
+        UPDATE pendencias SET
+          problema='$problema',
+          contramedida='$contramedida',
+          prazo=$prazo_sql,
+          responsavel='$responsavel'
+        WHERE id = $id_existente
+          AND id_usuario = $id_dono
+          AND id_iniciativa = $id_iniciativa
+      ";
+    } else {
+      $query = "
+        INSERT INTO pendencias
+          (id_usuario, id_iniciativa, problema, contramedida, prazo, responsavel)
+        VALUES
+          ($id_dono, $id_iniciativa, '$problema', '$contramedida', $prazo_sql, '$responsavel')
+      ";
     }
+    mysqli_query($conexao, $query);
+  }
 }
 
-$dados_pendencias = mysqli_query($conexao, "SELECT * FROM pendencias WHERE id_iniciativa = $id_iniciativa");
-
-$query_nome = "SELECT iniciativa FROM iniciativas WHERE id = $id_iniciativa";
-$resultado_nome = mysqli_query($conexao, $query_nome);
-$linha_nome = mysqli_fetch_assoc($resultado_nome);
-$nome_iniciativa = $linha_nome['iniciativa'] ?? 'Iniciativa Desconhecida';
+$dados_pendencias = mysqli_query(
+  $conexao,
+  "SELECT * FROM pendencias
+   WHERE id_usuario = $id_dono AND id_iniciativa = $id_iniciativa
+   ORDER BY id ASC"
+);
 ?>
 
 <div class="table-container">

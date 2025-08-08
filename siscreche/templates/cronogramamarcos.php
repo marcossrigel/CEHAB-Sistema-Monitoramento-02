@@ -6,8 +6,6 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
-$tipo_usuario = $_SESSION['tipo_usuario'] ?? 'usuario';
-
 if (!isset($_SESSION['id_usuario'])) {
     header('Location: login.php');
     exit;
@@ -16,37 +14,59 @@ if (!isset($_SESSION['id_usuario'])) {
 include_once('config.php');
 mysqli_set_charset($conexao, "utf8mb4");
 
-$id_iniciativa = (int) ($_GET['id_iniciativa'] ?? 0);
-$id_usuario = (int) ($_SESSION['id_usuario'] ?? 0);
+$tipo_usuario      = $_SESSION['tipo_usuario'] ?? 'usuario';
+$id_iniciativa     = (int)($_GET['id_iniciativa'] ?? 0);
+$id_usuario_logado = (int)($_SESSION['id_usuario'] ?? 0);
+$stmt = $conexao->prepare("SELECT id_usuario AS id_dono, iniciativa FROM iniciativas WHERE id = ?");
+$stmt->bind_param("i", $id_iniciativa);
+$stmt->execute();
+$resIni = $stmt->get_result();
+$rowIni = $resIni->fetch_assoc();
+if (!$rowIni) { die("Iniciativa não encontrada."); }
+$id_dono = (int)$rowIni['id_dono'];
+$nome_iniciativa = $rowIni['iniciativa'] ?? 'Iniciativa Desconhecida';
 
+$temAcesso = ($id_usuario_logado === $id_dono);
+if (!$temAcesso) {
+    $stmt = $conexao->prepare("
+        SELECT 1 FROM compartilhamentos 
+        WHERE id_dono = ? AND id_compartilhado = ? AND id_iniciativa = ? LIMIT 1
+    ");
+    $stmt->bind_param("iii", $id_dono, $id_usuario_logado, $id_iniciativa);
+    $stmt->execute();
+    $temAcesso = (bool)$stmt->get_result()->fetch_row();
+}
+if (!$temAcesso) { die("Sem permissão para acessar esta iniciativa."); }
+
+// ===== Salvar sempre no DONO =====
 if (isset($_POST['etapa'])) {
-    $id_etapa_custom = $_POST['id_etapa_custom'] ?? [];
-    $etapa = $_POST['etapa'] ?? [];
-    $inicio_previsto = $_POST['inicio_previsto'] ?? [];
+    $id_etapa_custom  = $_POST['id_etapa_custom'] ?? [];
+    $etapa            = $_POST['etapa'] ?? [];
+    $inicio_previsto  = $_POST['inicio_previsto'] ?? [];
     $termino_previsto = $_POST['termino_previsto'] ?? [];
-    $inicio_real = $_POST['inicio_real'] ?? [];
-    $termino_real = $_POST['termino_real'] ?? [];
-    $evolutivo = $_POST['evolutivo'] ?? [];
-    $ids = $_POST['ids'] ?? [];
-    $tipo_etapa = $_POST['tipo_etapa'] ?? [];
+    $inicio_real      = $_POST['inicio_real'] ?? [];
+    $termino_real     = $_POST['termino_real'] ?? [];
+    $evolutivo        = $_POST['evolutivo'] ?? [];
+    $ids              = $_POST['ids'] ?? [];
+    $tipo_etapa       = $_POST['tipo_etapa'] ?? [];
 
-    if (count($etapa) === 0) {
+    if (!count($etapa)) {
         echo "<p style='color:red;text-align:center'>Nenhuma linha foi enviada.</p>";
         exit;
     }
 
     for ($i = 0; $i < count($etapa); $i++) {
         $etapa_custom = mysqli_real_escape_string($conexao, $id_etapa_custom[$i] ?? '');
-        $id_existente = intval($ids[$i] ?? 0);
-        $etp = mysqli_real_escape_string($conexao, $etapa[$i]);
+        $id_existente = (int)($ids[$i] ?? 0);
+        $etp          = mysqli_real_escape_string($conexao, $etapa[$i]);
 
-        $ini_prev = trim($inicio_previsto[$i]) !== '' ? "'" . mysqli_real_escape_string($conexao, $inicio_previsto[$i]) . "'" : "NULL";
-        $ter_prev = trim($termino_previsto[$i]) !== '' ? "'" . mysqli_real_escape_string($conexao, $termino_previsto[$i]) . "'" : "NULL";
-        $ini_real = trim($inicio_real[$i]) !== '' ? "'" . mysqli_real_escape_string($conexao, $inicio_real[$i]) . "'" : "NULL";
-        $ter_real = trim($termino_real[$i]) !== '' ? "'" . mysqli_real_escape_string($conexao, $termino_real[$i]) . "'" : "NULL";
+        $ini_prev = trim($inicio_previsto[$i])  !== '' ? "'".mysqli_real_escape_string($conexao,$inicio_previsto[$i])."'"  : "NULL";
+        $ter_prev = trim($termino_previsto[$i]) !== '' ? "'".mysqli_real_escape_string($conexao,$termino_previsto[$i])."'" : "NULL";
+        $ini_realv= trim($inicio_real[$i])      !== '' ? "'".mysqli_real_escape_string($conexao,$inicio_real[$i])."'"      : "NULL";
+        $ter_realv= trim($termino_real[$i])     !== '' ? "'".mysqli_real_escape_string($conexao,$termino_real[$i])."'"     : "NULL";
 
         $evo_raw = trim($evolutivo[$i]);
-        $evo = $evo_raw !== '' ? "'" . mysqli_real_escape_string($conexao, $evo_raw) . "'" : "NULL";
+        $evo     = $evo_raw !== '' ? "'".mysqli_real_escape_string($conexao,$evo_raw)."'" : "NULL";
 
         $tipo = mysqli_real_escape_string($conexao, $tipo_etapa[$i] ?? 'linha');
 
@@ -57,17 +77,17 @@ if (isset($_POST['etapa'])) {
                 id_etapa_custom='$etapa_custom',
                 inicio_previsto=$ini_prev,
                 termino_previsto=$ter_prev,
-                inicio_real=$ini_real,
-                termino_real=$ter_real,
+                inicio_real=$ini_realv,
+                termino_real=$ter_realv,
                 evolutivo=$evo
-              WHERE id = $id_existente AND id_usuario = $id_usuario";
+              WHERE id = $id_existente AND id_usuario = $id_dono";
         } else {
             $query = "INSERT INTO marcos (
                 id_usuario, id_iniciativa, id_etapa_custom, tipo_etapa, etapa,
                 inicio_previsto, termino_previsto, inicio_real, termino_real, evolutivo
               ) VALUES (
-                '$id_usuario', '$id_iniciativa', '$etapa_custom', '$tipo', '$etp',
-                $ini_prev, $ter_prev, $ini_real, $ter_real, $evo
+                '$id_dono', '$id_iniciativa', '$etapa_custom', '$tipo', '$etp',
+                $ini_prev, $ter_prev, $ini_realv, $ter_realv, $evo
               )";
         }
 
@@ -78,12 +98,17 @@ if (isset($_POST['etapa'])) {
     }
 }
 
-$query_nome = "SELECT iniciativa FROM iniciativas WHERE id = $id_iniciativa";
-$resultado_nome = mysqli_query($conexao, $query_nome);
-$linha_nome = mysqli_fetch_assoc($resultado_nome);
-$nome_iniciativa = $linha_nome['iniciativa'] ?? 'Iniciativa Desconhecida';
-
-$query_dados = "SELECT * FROM marcos WHERE id_usuario = $id_usuario AND id_iniciativa = $id_iniciativa";
+// Ordenação numérica correta (1, 1.2, 1.10, 2, ...)
+$query_dados = "
+  SELECT * FROM marcos
+  WHERE id_usuario = $id_dono AND id_iniciativa = $id_iniciativa
+  ORDER BY
+    CAST(SUBSTRING_INDEX(id_etapa_custom, '.', 1) AS UNSIGNED),
+    CASE
+      WHEN id_etapa_custom LIKE '%.%' THEN CAST(SUBSTRING_INDEX(id_etapa_custom, '.', -1) AS UNSIGNED)
+      ELSE 0
+    END
+";
 $dados = mysqli_query($conexao, $query_dados);
 
 function formatarParaBrasileiro($valor) {
@@ -364,7 +389,7 @@ document.querySelector('form').addEventListener('submit', function(event) {
     const id = linha.getAttribute('data-id');
     const cells = linha.cells;
 
-    const etapaField = cells[0].querySelector('textarea, input');
+    const etapaField = cells[1].querySelector('textarea, input');
     
     let tipo = 'linha';
     if (etapaField?.placeholder === 'Título') {
@@ -376,33 +401,17 @@ document.querySelector('form').addEventListener('submit', function(event) {
       }
     }
 
-    const campos = [
-      etapaField?.value.trim() || '',
-      cells[1].querySelector('input')?.value.trim() || '',
-      cells[2].querySelector('input')?.value.trim() || '',
-      cells[3].querySelector('input')?.value.trim() || '',
-      cells[4].querySelector('input')?.value.trim() || '',
-      cells[5].querySelector('input')?.value.trim() || ''
-    ];
+    const dtInicioPrev  = cells[2].querySelector('input')?.value.trim() || '';
+    const dtTermPrev    = cells[3].querySelector('input')?.value.trim() || '';
+    const dtInicioReal  = cells[4].querySelector('input')?.value.trim() || '';
+    const dtTermReal    = cells[5].querySelector('input')?.value.trim() || '';
+
+    const campos = [ (etapaField?.value.trim() || ''), dtInicioPrev, dtTermPrev, dtInicioReal, dtTermReal ];
 
     const linhaEstaVazia = campos.every(c => c === '');
     if (linhaEstaVazia) continue;
 
     temLinhaValida = true;
-
-    if (!id) {
-      const inputTipo = document.createElement('input');
-      inputTipo.type = 'hidden';
-      inputTipo.name = 'tipo_etapa[]';
-      inputTipo.value = tipo;
-      form.appendChild(inputTipo);
-
-      const inputId = document.createElement('input');
-      inputId.type = 'hidden';
-      inputId.name = 'ids[]';
-      inputId.value = '';
-      form.appendChild(inputId);
-    }
 
     if (tipo === 'subtitulo') {
       if (tituloIndex !== -1 && datasInicio.length > 0 && datasTermino.length > 0) {
@@ -412,10 +421,8 @@ document.querySelector('form').addEventListener('submit', function(event) {
       datasInicio = [];
       datasTermino = [];
     } else if (tipo === 'linha') {
-      const dtInicio = cells[1].querySelector('input')?.value;
-      const dtFim = cells[2].querySelector('input')?.value;
-      if (dtInicio) datasInicio.push(dtInicio);
-      if (dtFim) datasTermino.push(dtFim);
+      if (dtInicioPrev) datasInicio.push(dtInicioPrev);
+      if (dtTermPrev)   datasTermino.push(dtTermPrev);
     }
   }
 
@@ -427,8 +434,8 @@ document.querySelector('form').addEventListener('submit', function(event) {
     const campoInicio = tituloRow.querySelector('input[name="inicio_previsto[]"]');
     const campoFim = tituloRow.querySelector('input[name="termino_previsto[]"]');
 
-    const menorData = inicios.sort()[0];
-    const maiorData = fins.sort().reverse()[0];
+    const menorData = inicios.filter(Boolean).sort((a,b)=>new Date(a)-new Date(b))[0];
+    const maiorData = fins.filter(Boolean).sort((a,b)=>new Date(b)-new Date(a))[0];
 
     if (campoInicio) campoInicio.value = menorData;
     if (campoFim) campoFim.value = maiorData;
@@ -960,8 +967,9 @@ document.addEventListener('click', function(event) {
 });
 
 document.addEventListener('click', function(event) {
-  if (event.target.classList.contains('acao-menos')) {
-    const linhaAtual = event.target.closest('tr');
+  const btnMenos = event.target.closest('.acao-menos');
+  if (btnMenos) {
+    const linhaAtual = btnMenos.closest('tr');
     const tabela = document.querySelector('#spreadsheet tbody');
     const idInput = linhaAtual.querySelector('input[name="id_etapa_custom[]"]');
 

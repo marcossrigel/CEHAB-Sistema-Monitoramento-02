@@ -12,74 +12,81 @@ if (!isset($_SESSION['id_usuario'])) {
 }
 
 include_once('config.php');
+mysqli_set_charset($conexao, "utf8mb4");
 if (!$conexao) {
     die("Erro na conexão com o banco: " . mysqli_connect_error());
 }
 
-$id_usuario = $_SESSION['id_usuario'];
-$id_iniciativa = isset($_POST['id_iniciativa']) ? intval($_POST['id_iniciativa']) : (isset($_GET['id_iniciativa']) ? intval($_GET['id_iniciativa']) : 0);
+$id_usuario_logado = (int)$_SESSION['id_usuario'];
+$id_iniciativa = isset($_POST['id_iniciativa'])
+  ? (int)$_POST['id_iniciativa']
+  : (isset($_GET['id_iniciativa']) ? (int)$_GET['id_iniciativa'] : 0);
 
-$query_verificacao = "
-    SELECT 1 FROM iniciativas 
-    WHERE id = $id_iniciativa AND (
-        id_usuario = $id_usuario OR 
-        $id_usuario IN (
-            SELECT id_compartilhado FROM compartilhamentos 
-            WHERE id_iniciativa = $id_iniciativa
-        )
-    )";
+// --- Resolve DONO e valida permissão ---
+$stmt = $conexao->prepare("SELECT id_usuario AS id_dono, iniciativa FROM iniciativas WHERE id = ?");
+$stmt->bind_param("i", $id_iniciativa);
+$stmt->execute();
+$res = $stmt->get_result();
+$ini = $res->fetch_assoc();
+if (!$ini) { die("Iniciativa não encontrada."); }
+$id_dono = (int)$ini['id_dono'];
+$nome_iniciativa = $ini['iniciativa'] ?? 'Iniciativa Desconhecida';
 
-$result_verificacao = mysqli_query($conexao, $query_verificacao);
-if (mysqli_num_rows($result_verificacao) === 0) {
-    echo "Você não tem permissão para acessar esta iniciativa.";
-    exit;
+$temAcesso = ($id_usuario_logado === $id_dono);
+if (!$temAcesso) {
+  $stmt = $conexao->prepare("
+    SELECT 1 FROM compartilhamentos
+    WHERE id_dono = ? AND id_compartilhado = ? AND id_iniciativa = ?
+    LIMIT 1
+  ");
+  $stmt->bind_param("iii", $id_dono, $id_usuario_logado, $id_iniciativa);
+  $stmt->execute();
+  $temAcesso = (bool)$stmt->get_result()->fetch_row();
 }
+if (!$temAcesso) { die("Você não tem permissão para acessar esta iniciativa."); }
 
-$query_nome = "SELECT iniciativa FROM iniciativas WHERE id = $id_iniciativa";
-$result_nome = mysqli_query($conexao, $query_nome);
-$linha_nome = mysqli_fetch_assoc($result_nome);
-$nome_iniciativa = $linha_nome['iniciativa'] ?? 'Iniciativa Desconhecida';
-
-$query_busca = "SELECT * FROM contratuais WHERE id_iniciativa = $id_iniciativa LIMIT 1";
-$resultado = mysqli_query($conexao, $query_busca);
-$dados = mysqli_fetch_assoc($resultado);
-
-function formatar_moeda($valor) {
-    if ($valor === null || $valor === '') return 'R$ ';
-    return 'R$ ' . number_format((float)$valor, 2, ',', '.');
+// --- Salvar sempre no DONO ---
+if (!function_exists('formatar_moeda')) {
+    function formatar_moeda($valor) {
+        if ($valor === null || $valor === '') return 'R$ ';
+        return 'R$ ' . number_format((float)$valor, 2, ',', '.');
+    }
 }
 
 if (isset($_POST['salvar'])) {
-    $processo_licitatorio = mysqli_real_escape_string($conexao, $_POST['processo_licitatorio']);
-    $empresa = mysqli_real_escape_string($conexao, $_POST['empresa']);
-    $data_assinatura_contrato = $_POST['data_assinatura_contrato'];
-    $data_os = $_POST['data_os'];
-    $prazo_execucao_original = $_POST['prazo_execucao_original'];
-    $prazo_execucao_atual = $_POST['prazo_execucao_atual'];
+    $processo_licitatorio    = mysqli_real_escape_string($conexao, $_POST['processo_licitatorio'] ?? '');
+    $empresa                 = mysqli_real_escape_string($conexao, $_POST['empresa'] ?? '');
+    $data_assinatura_contrato= $_POST['data_assinatura_contrato'] ?? null;
+    $data_os                 = $_POST['data_os'] ?? null;
+    $prazo_execucao_original = $_POST['prazo_execucao_original'] ?? '';
+    $prazo_execucao_atual    = $_POST['prazo_execucao_atual'] ?? '';
 
     function limpar_valor_decimal($valor) {
-        $valor = trim($valor);
+        $valor = trim((string)$valor);
         if ($valor === '' || strtolower($valor) === 'r$') return "NULL";
-        $valor = str_replace(['R$', '.', ','], ['', '', '.'], $valor);
+        $valor = str_replace(['R$', ' ', '.', ','], ['', '', '', '.'], $valor);
         return is_numeric($valor) ? $valor : "NULL";
     }
 
-    $valor_inicial_obra = limpar_valor_decimal($_POST['valor_inicial_obra']);
-    $valor_aditivo_obra = limpar_valor_decimal($_POST['valor_aditivo_obra']);
-    $valor_total_obra = limpar_valor_decimal($_POST['valor_total_obra']);
-    $valor_inicial_contrato = limpar_valor_decimal($_POST['valor_inicial_contrato']);
-    $valor_aditivo = limpar_valor_decimal($_POST['valor_aditivo']);
-    $valor_contrato = limpar_valor_decimal($_POST['valor_contrato']);
+    $valor_inicial_obra      = limpar_valor_decimal($_POST['valor_inicial_obra'] ?? '');
+    $valor_aditivo_obra      = limpar_valor_decimal($_POST['valor_aditivo_obra'] ?? '');
+    $valor_total_obra        = limpar_valor_decimal($_POST['valor_total_obra'] ?? '');
+    $valor_inicial_contrato  = limpar_valor_decimal($_POST['valor_inicial_contrato'] ?? '');
+    $valor_aditivo           = limpar_valor_decimal($_POST['valor_aditivo'] ?? '');
+    $valor_contrato          = limpar_valor_decimal($_POST['valor_contrato'] ?? '');
 
-    $cod_subtracao = mysqli_real_escape_string($conexao, $_POST['cod_subtracao']);
-    $secretaria_demandante = mysqli_real_escape_string($conexao, $_POST['secretaria_demandante']);
+    $cod_subtracao           = mysqli_real_escape_string($conexao, $_POST['cod_subtracao'] ?? '');
+    $secretaria_demandante   = mysqli_real_escape_string($conexao, $_POST['secretaria_demandante'] ?? '');
 
-    if ($dados) {
-        $query_update = "UPDATE contratuais SET 
+    // Existe registro de contratuais do DONO?
+    $q = mysqli_query($conexao, "SELECT id FROM contratuais WHERE id_usuario = $id_dono AND id_iniciativa = $id_iniciativa LIMIT 1");
+    if ($q && mysqli_num_rows($q) > 0) {
+        $query_update = "
+          UPDATE contratuais SET 
             processo_licitatorio='$processo_licitatorio',
             empresa='$empresa',
-            data_assinatura_contrato='$data_assinatura_contrato',
-            data_os='$data_os',
+            data_assinatura_contrato=" . ($data_assinatura_contrato ? "'$data_assinatura_contrato'" : "NULL") . ",
+            data_os=" . ($data_os ? "'$data_os'" : "NULL") . ",
             prazo_execucao_original='$prazo_execucao_original',
             prazo_execucao_atual='$prazo_execucao_atual',
             valor_inicial_obra=$valor_inicial_obra,
@@ -90,56 +97,67 @@ if (isset($_POST['salvar'])) {
             valor_contrato=$valor_contrato,
             cod_subtracao='$cod_subtracao',
             secretaria_demandante='$secretaria_demandante'
-            WHERE id_iniciativa=$id_iniciativa";
+          WHERE id_usuario=$id_dono AND id_iniciativa=$id_iniciativa
+        ";
         mysqli_query($conexao, $query_update);
     } else {
-        $query_insert = "INSERT INTO contratuais (
+        $query_insert = "
+          INSERT INTO contratuais (
             id_usuario, id_iniciativa, processo_licitatorio, empresa, data_assinatura_contrato, data_os, 
             prazo_execucao_original, prazo_execucao_atual, 
             valor_inicial_obra, valor_aditivo_obra, valor_total_obra, 
             valor_inicial_contrato, valor_aditivo, valor_contrato, 
             cod_subtracao, secretaria_demandante
-        ) VALUES (
-            {$_SESSION['id_usuario']}, $id_iniciativa, '$processo_licitatorio', '$empresa', '$data_assinatura_contrato', '$data_os', 
+          ) VALUES (
+            $id_dono, $id_iniciativa, '$processo_licitatorio', '$empresa', " . 
+            ($data_assinatura_contrato ? "'$data_assinatura_contrato'" : "NULL") . ", " .
+            ($data_os ? "'$data_os'" : "NULL") . ", 
             '$prazo_execucao_original', '$prazo_execucao_atual', 
             $valor_inicial_obra, $valor_aditivo_obra, $valor_total_obra, 
             $valor_inicial_contrato, $valor_aditivo, $valor_contrato, 
             '$cod_subtracao', '$secretaria_demandante'
-        )";
+          )
+        ";
         mysqli_query($conexao, $query_insert);
     }
 
+    // --- Sincroniza valores na tabela MEDIÇÕES do DONO ---
     $valor_total_para_medicoes = $valor_inicial_obra;
-    $valor_bm_para_medicoes = $valor_aditivo;
-    
-    $query_verifica_medicao = "SELECT id FROM medicoes WHERE id_usuario = {$_SESSION['id_usuario']} AND id_iniciativa = $id_iniciativa LIMIT 1";
-    $result_medicao = mysqli_query($conexao, $query_verifica_medicao);
+    $valor_bm_para_medicoes    = $valor_aditivo;
 
-    if (mysqli_num_rows($result_medicao) > 0) {
-        $linha = mysqli_fetch_assoc($result_medicao);
-        $id_medicao = $linha['id'];
-        $query_update_medicao = "UPDATE medicoes 
-                                SET valor_orcamento = $valor_total_para_medicoes, 
-                                    valor_bm = $valor_bm_para_medicoes 
-                                WHERE id = $id_medicao";
-        mysqli_query($conexao, $query_update_medicao);
+    $qMed = mysqli_query($conexao, "
+      SELECT id FROM medicoes 
+      WHERE id_usuario = $id_dono AND id_iniciativa = $id_iniciativa LIMIT 1
+    ");
+
+    if ($qMed && mysqli_num_rows($qMed) > 0) {
+        $linha = mysqli_fetch_assoc($qMed);
+        $id_medicao = (int)$linha['id'];
+        mysqli_query($conexao, "
+          UPDATE medicoes 
+          SET valor_orcamento = $valor_total_para_medicoes, 
+              valor_bm       = $valor_bm_para_medicoes
+          WHERE id = $id_medicao
+        ");
     } else {
-        $query_insert_medicao = "INSERT INTO medicoes 
-            (id_usuario, id_iniciativa, valor_orcamento, valor_bm, data_registro)
-            VALUES 
-            ({$_SESSION['id_usuario']}, $id_iniciativa, $valor_total_para_medicoes, $valor_bm_para_medicoes, NOW())";
-        mysqli_query($conexao, $query_insert_medicao);
+        mysqli_query($conexao, "
+          INSERT INTO medicoes (id_usuario, id_iniciativa, valor_orcamento, valor_bm, data_registro)
+          VALUES ($id_dono, $id_iniciativa, $valor_total_para_medicoes, $valor_bm_para_medicoes, NOW())
+        ");
     }
 
-    if (!headers_sent()) {
-        header("Location: index.php?page=info_contratuais&id_iniciativa=$id_iniciativa");
-        exit;
-    } else {
-        echo "Redirecionamento falhou! <a href='index.php?page=info_contratuais&id_iniciativa=$id_iniciativa'>Clique aqui para continuar</a>";
-        exit;
-    }
-
+    header("Location: index.php?page=info_contratuais&id_iniciativa=$id_iniciativa");
+    exit;
 }
+
+// --- Carrega dados SEMPRE do DONO ---
+$qContr = mysqli_query($conexao, "
+  SELECT * FROM contratuais 
+  WHERE id_usuario = $id_dono AND id_iniciativa = $id_iniciativa
+  LIMIT 1
+");
+$dados = mysqli_fetch_assoc($qContr);
+
 ?>
 
   <div class="container">
