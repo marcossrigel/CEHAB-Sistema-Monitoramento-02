@@ -1,6 +1,6 @@
 body { font-family: Arial; background: #f1f1f1; }
 .container {
-    max-width: 80%;
+    max-width: 90%;
     margin: auto;
     padding: 20px;
     background: white;
@@ -93,6 +93,60 @@ td:last-child button {
 
 .celula-acoes {
   display: flex;
-  align-items: center;
+  align-items: center;   /* centraliza verticalmente os botões */
   justify-content: center;
+  height: 100%;          /* garante altura igual à linha */
+  box-sizing: border-box;
 }
+
+#medicoes { border-collapse: separate; border-spacing: 0; }
+
+/* 2) remove o border-bottom das células */
+#medicoes td, #medicoes th { border: 1px solid #ddd; }
+#medicoes td, #medicoes th { border-bottom: none; }
+
+/* 3) aplica o separador na linha inteira */
+#medicoes tr { border-bottom: 1px solid #ddd; }
+
+/* 4) pequenos ajustes */
+.celula-acoes { display:flex; align-items:center; justify-content:center; padding:8px; }
+#medicoes td { vertical-align: top; }
+#medicoes textarea { margin:0; }
+
+/* Inputs/textarea ocupam a célula toda */
+#medicoes input,
+#medicoes textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-size: 14px;
+}
+
+/* Campo numérico curtinho (Ordem) */
+#medicoes .num {
+  text-align: center;
+}
+
+/* Altura e redimensionamento do textarea (Observação) */
+#medicoes .obs {
+  min-height: 36px;
+  resize: vertical;
+  line-height: 1.35;
+  white-space: pre-wrap; /* quebra o texto automaticamente */
+  word-wrap: break-word; /* força quebra no meio de palavras longas */
+  overflow: hidden;
+}
+
+#medicoes tr:last-child td {
+    border-bottom: 1px solid #ddd;
+}
+
+
+/* ---- Larguras por coluna via <colgroup> ---- */
+/* ajuste os valores se quiser mais/menos espaço */
+.col-ordem       { width: 5ch; }
+.col-texto-largo { width: 20ch; } /* era 24ch */
+.col-data        { width: 12ch; } /* era 14ch */
+.col-status      { width: 14ch; } /* era 18ch */
+.col-observacao  { width: 25ch; } /* era 30ch */
+.col-acoes       { width: 7ch; }

@@ -112,52 +112,73 @@ $nome_iniciativa = htmlspecialchars($nome_iniciativa);
 ?>
 
 <div class="container">
-    <h2>Projeto <?php echo htmlspecialchars($nome_iniciativa); ?></h2>
+    <h2>Projeto - <?php echo htmlspecialchars($nome_iniciativa); ?></h2>
 
     <form method="post" action="index.php?page=projeto_licitacoes&id_iniciativa=<?php echo $id_iniciativa; ?>">
         <div class="table-wrapper">
+        
         <table id="medicoes">
-            <thead>
-                <tr>
-                    <th>Ordem</th>
-                    <th>Etapa</th>
-                    <th>Responsável</th>
-                    <th>Início Previsto</th>
-                    <th>Término Previsto</th>
-                    <th>Início Real</th>
-                    <th>Término Real</th>
-                    <th>Status</th>
-                    <th>Observação</th>
-                    <th>Ações</th>
-                </tr>
-            </thead>
-            
-            <tbody>
-            <?php while ($linha = mysqli_fetch_assoc($dados)) { ?>
-                <tr data-id="<?php echo $linha['id']; ?>">
-                    <td>
-                        <input type="hidden" name="ids[]" value="<?= htmlspecialchars($linha['id']) ?>">
-                        <input type="text" name="ordem[]" value="<?= htmlspecialchars($linha['ordem'] ?? '') ?>">
-                    </td>
-                    <td><input type="text" name="etapa[]" value="<?= htmlspecialchars($linha['etapa'] ?? '') ?>"></td>
-                    <td><input type="text" name="responsavel[]" value="<?= htmlspecialchars($linha['responsavel'] ?? '') ?>"></td>
-                    <td><input type="date" name="inicio_previsto[]" value="<?= htmlspecialchars($linha['inicio_previsto'] ?? '') ?>"></td>
-                    <td><input type="date" name="termino_previsto[]" value="<?= htmlspecialchars($linha['termino_previsto'] ?? '') ?>"></td>
-                    <td><input type="date" name="inicio_real[]" value="<?= htmlspecialchars($linha['inicio_real'] ?? '') ?>"></td>
-                    <td><input type="date" name="termino_real[]" value="<?= htmlspecialchars($linha['termino_real'] ?? '') ?>"></td>
-                    <td><input type="text" name="status[]" value="<?= htmlspecialchars($linha['status'] ?? '') ?>"></td>
-                    <td><input type="text" name="observacao[]" value="<?= htmlspecialchars($linha['observacao'] ?? '') ?>"></td>
-                    
-                    <td class="celula-acoes">
-                        <button type="button" class="botao-acao botao-mais" onclick="inserirAntes(this)">➕</button>
-                        <button type="button" class="botao-acao botao-menos" onclick="deletarLinha(<?php echo $linha['id']; ?>)">❌</button>
-                    </td>
-                </tr>
-            <?php } ?>
-            
-            </tbody>
+        <!-- CONTROLE DE LARGURA DAS COLUNAS -->
+        <colgroup>
+            <col class="col-ordem">
+            <col class="col-texto-largo">      <!-- Etapa -->
+            <col class="col-texto-largo">      <!-- Responsável -->
+            <col class="col-data">             <!-- Início Previsto -->
+            <col class="col-data">             <!-- Término Previsto -->
+            <col class="col-data">             <!-- Início Real -->
+            <col class="col-data">             <!-- Término Real -->
+            <col class="col-status">           <!-- Status -->
+            <col class="col-observacao">       <!-- Observação -->
+            <col class="col-acoes">            <!-- Ações -->
+        </colgroup>
 
+        <thead>
+        <tr>
+            <th>Ordem</th>
+            <th>Etapa</th>
+            <th>Responsável</th>
+            <th>Início Previsto</th>
+            <th>Término Previsto</th>
+            <th>Início Real</th>
+            <th>Término Real</th>
+            <th>Status</th>
+            <th>Observação</th>
+            <th>Ações</th>
+        </tr>
+        </thead>
+        <tbody>
+            <?php while ($linha = mysqli_fetch_assoc($dados)) { ?>
+            <tr data-id="<?= $linha['id'] ?>">
+                <td>
+                <input type="hidden" name="ids[]" value="<?= htmlspecialchars($linha['id']) ?>">
+                <input class="num" type="text" name="ordem[]" value="<?= htmlspecialchars($linha['ordem'] ?? '') ?>">
+                </td>
+
+                <td><input type="text" name="etapa[]"        value="<?= htmlspecialchars($linha['etapa'] ?? '') ?>"></td>
+                <td><input type="text" name="responsavel[]"  value="<?= htmlspecialchars($linha['responsavel'] ?? '') ?>"></td>
+
+                <td><input type="date" name="inicio_previsto[]"  value="<?= htmlspecialchars($linha['inicio_previsto'] ?? '') ?>"></td>
+                <td><input type="date" name="termino_previsto[]" value="<?= htmlspecialchars($linha['termino_previsto'] ?? '') ?>"></td>
+                <td><input type="date" name="inicio_real[]"      value="<?= htmlspecialchars($linha['inicio_real'] ?? '') ?>"></td>
+                <td><input type="date" name="termino_real[]"     value="<?= htmlspecialchars($linha['termino_real'] ?? '') ?>"></td>
+
+                <td><input type="text" name="status[]" value="<?= htmlspecialchars($linha['status'] ?? '') ?>"></td>
+
+                <!-- textarea em Observação -->
+                <td>
+                <textarea name="observacao[]" class="obs" rows="1" wrap="soft"><?= htmlspecialchars($linha['observacao'] ?? '') ?></textarea>
+                </td>
+
+                <td class="celula-acoes">
+                <button type="button" class="botao-acao botao-mais"  onclick="inserirAntes(this)">➕</button>
+                <button type="button" class="botao-acao botao-menos" onclick="deletarLinha(<?= (int)$linha['id'] ?>)">❌</button>
+                </td>
+            </tr>
+            <?php } ?>
+        </tbody>
         </table>
+
+
         <div class="buttons">
             <button type="button" onclick="adicionarLinha()">Adicionar Linha</button>
             <button type="submit" name="salvar">Salvar</button>

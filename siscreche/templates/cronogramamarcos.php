@@ -38,7 +38,6 @@ if (!$temAcesso) {
 }
 if (!$temAcesso) { die("Sem permissão para acessar esta iniciativa."); }
 
-// ===== Salvar sempre no DONO =====
 if (isset($_POST['etapa'])) {
     $id_etapa_custom  = $_POST['id_etapa_custom'] ?? [];
     $etapa            = $_POST['etapa'] ?? [];
@@ -98,7 +97,6 @@ if (isset($_POST['etapa'])) {
     }
 }
 
-// Ordenação numérica correta (1, 1.2, 1.10, 2, ...)
 $query_dados = "
   SELECT * FROM marcos
   WHERE id_usuario = $id_dono AND id_iniciativa = $id_iniciativa
