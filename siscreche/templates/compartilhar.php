@@ -1,169 +1,104 @@
 <?php
+// templates/compartilhar_modal.php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
+if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
+if (empty($_SESSION['id_usuario'])) { http_response_code(401); exit('Sem sessão'); }
 
-if (!isset($_SESSION['id_usuario'])) {
-    header('Location: login.php');
-    exit;
-}
+require_once __DIR__ . '/config.php';
+$id_usuario = (int)$_SESSION['id_usuario'];
 
-include("config.php");
-
-$id_usuario = $_SESSION['id_usuario'];
-
-$sql_iniciativas = "SELECT id, iniciativa FROM iniciativas WHERE id_usuario = $id_usuario";
-
+// Suas iniciativas
+$sql_iniciativas = "SELECT id, iniciativa FROM iniciativas WHERE id_usuario = $id_usuario ORDER BY id DESC";
 $res_iniciativas = $conexao->query($sql_iniciativas);
 
+// Já compartilhados
 $sql_compartilhados = "
-    SELECT DISTINCT u.nome AS nome_usuario, u.id_usuario 
-    FROM compartilhamentos c 
-    JOIN usuarios u ON c.id_compartilhado = u.id_usuario 
-    WHERE c.id_dono = $id_usuario
+  SELECT DISTINCT u.nome AS nome_usuario, u.id_usuario
+    FROM compartilhamentos c
+    JOIN usuarios u ON u.id_usuario = c.id_compartilhado
+   WHERE c.id_dono = $id_usuario
+   ORDER BY u.nome
 ";
-$res_compartilhados = $conexao->query($sql_compartilhados);
+$res_comp = $conexao->query($sql_compartilhados);
 ?>
+<div class="space-y-5">
+  <h2 class="text-lg font-semibold text-slate-800">Compartilhar Iniciativas</h2>
 
-<div class="pagina-formulario">
-  <div class="formulario">
-    <h2 class="main-title">Compartilhar Iniciativas</h2>
-    
-    <form action="index.php?page=salvar_compartilhamento" method="post">
-        <label for="usuario" class="label">Nome do Usuário (REDE):</label>
-        <input type="text" name="usuario" id="usuario" placeholder="Digite o nome do usuário da rede" required>
+  <form id="formCompartilhar" class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-slate-700 mb-1">Nome do Usuário (REDE)</label>
+      <div class="relative">
+        <input type="text" name="usuario" id="cmp_usuario"
+               placeholder="Digite o nome do usuário da rede"
+               required
+               class="w-full border rounded-lg px-3 py-2">
+        <div id="cmp_sugestoes"
+             class="absolute left-0 right-0 top-full bg-white border rounded-md shadow max-h-52 overflow-y-auto hidden z-10"></div>
+      </div>
+    </div>
 
-        <h3 style="margin-top: 20px;">Selecione as iniciativas a compartilhar:</h3>
-        <div style="margin: 6px 0;">
-            <input type="checkbox" id="selecionar_tudo">
-            <label for="selecionar_tudo">Selecionar Todas</label>
-        </div>
-        <?php if ($res_iniciativas->num_rows > 0): ?>
-            <?php while ($linha = $res_iniciativas->fetch_assoc()): ?>
-                <div style="margin: 6px 0;">
-                    <input type="checkbox" name="iniciativas[]" value="<?= $linha['id'] ?>" id="inic<?= $linha['id'] ?>">
-                    <label for="inic<?= $linha['id'] ?>"><?= htmlspecialchars($linha['iniciativa']) ?></label>
-                </div>
-            <?php endwhile; ?>
+    <div class="pt-2">
+      <div class="font-medium text-slate-800 mb-2">Selecione as iniciativas a compartilhar:</div>
+
+      <label class="inline-flex items-center gap-2 mb-2">
+        <input type="checkbox" id="cmp_todos" class="rounded border-slate-300">
+        <span>Selecionar todas</span>
+      </label>
+
+      <div class="grid sm:grid-cols-2 gap-2">
+        <?php if ($res_iniciativas && $res_iniciativas->num_rows): ?>
+          <?php while ($l = $res_iniciativas->fetch_assoc()): ?>
+            <label class="flex items-start gap-2 p-2 border rounded-lg bg-white">
+              <input type="checkbox" name="iniciativas[]" value="<?= (int)$l['id'] ?>" class="mt-1 rounded border-slate-300">
+              <span class="text-sm"><?= htmlspecialchars($l['iniciativa'], ENT_QUOTES, 'UTF-8') ?></span>
+            </label>
+          <?php endwhile; ?>
         <?php else: ?>
-            <p>Você não possui iniciativas para compartilhar.</p>
+          <div class="text-slate-500">Você não possui iniciativas para compartilhar.</div>
         <?php endif; ?>
+      </div>
+    </div>
 
-        <br>
-        <button type="submit" class="btn">Compartilhar</button>
-        <a href="index.php?page=visualizar" class="texto-login">Cancelar</a>
-    </form>
+    <div class="flex items-center justify-end gap-2">
+      <button type="button" data-close-compartilhar
+              class="rounded-full px-4 py-2 border border-slate-300 text-slate-800 hover:bg-slate-50">Cancelar</button>
+      <button type="submit"
+              class="rounded-full px-5 py-2 bg-blue-600 text-white font-semibold hover:bg-blue-700">Compartilhar</button>
+    </div>
+  </form>
 
-    <hr>
+  <hr class="border-slate-200">
 
-    <h3 style="margin-top: 30px;">Já Compartilhado com:</h3>
-    <ul class="lista-compartilhados">
-        <?php if ($res_compartilhados->num_rows > 0): ?>
+  <div>
+    <div class="font-medium text-slate-800 mb-2">Já compartilhado com:</div>
+    <?php if ($res_comp && $res_comp->num_rows): ?>
+      <ul class="divide-y rounded-lg border bg-white">
+        <?php while ($l = $res_comp->fetch_assoc()): ?>
+          <ul class="lista-compartilhados divide-y divide-slate-200">
             <?php while ($linha = $res_compartilhados->fetch_assoc()): ?>
-                <li>
-                    <img src="perfil.png" alt="Foto de perfil" class="icone-usuario">
-                    <span><?= htmlspecialchars($linha['nome_usuario']) ?></span>
-                    <button class="btn-remover" data-id="<?= $linha['id_usuario'] ?>" title="Remover compartilhamento">🗑️</button>
-                </li>
-
-                </li>
+              <li class="flex items-center gap-2 py-2">
+                <img src="img/user.png"
+                    alt=""
+                    class="h-5 w-5 rounded-full shrink-0"
+                    loading="lazy" />
+                <span class="text-sm text-slate-800 flex-1 truncate">
+                  <?= htmlspecialchars($linha['nome_usuario']) ?>
+                </span>
+                <button class="cmp-remover text-red-600 hover:underline text-sm"
+                        data-id="<?= (int)$linha['id_usuario'] ?>">
+                  Remover
+                </button>
+              </li>
             <?php endwhile; ?>
-        <?php else: ?>
-            <p>Nenhum usuário ainda.</p>
-        <?php endif; ?>
-    </ul>
+          </ul>
+
+        <?php endwhile; ?>
+      </ul>
+    <?php else: ?>
+      <div class="text-slate-500">Nenhum usuário ainda.</div>
+    <?php endif; ?>
   </div>
 </div>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const inputUsuario = document.getElementById("usuario");
-
-    const listaSugestoes = document.createElement("div");
-    listaSugestoes.style.position = "absolute";
-    listaSugestoes.style.background = "#fff";
-    listaSugestoes.style.border = "1px solid #ccc";
-    listaSugestoes.style.zIndex = "999";
-    listaSugestoes.style.width = inputUsuario.offsetWidth + "px";
-    listaSugestoes.style.maxHeight = "150px";
-    listaSugestoes.style.overflowY = "auto";
-    listaSugestoes.style.display = "none";
-    inputUsuario.parentNode.appendChild(listaSugestoes);
-
-    inputUsuario.addEventListener("input", function () {
-        const termo = this.value;
-        if (termo.length < 2) {
-            listaSugestoes.style.display = "none";
-            return;
-        }
-
-        fetch(`templates/compartilhar_buscar_usuario.php?termo=${encodeURIComponent(termo)}`)
-            .then(res => res.json())
-            .then(data => {
-                listaSugestoes.innerHTML = "";
-                data.forEach(usuario => {
-                    const div = document.createElement("div");
-                    div.textContent = usuario;
-                    div.style.padding = "8px";
-                    div.style.cursor = "pointer";
-                    div.addEventListener("click", function () {
-                        inputUsuario.value = usuario;
-                        listaSugestoes.style.display = "none";
-                    });
-                    listaSugestoes.appendChild(div);
-                });
-                listaSugestoes.style.display = "block";
-            });
-    });
-
-    document.addEventListener("click", function (e) {
-        if (!inputUsuario.contains(e.target)) {
-            listaSugestoes.style.display = "none";
-        }
-    });
-});
-
-document.querySelectorAll(".btn-remover").forEach(button => {
-    button.addEventListener("click", function () {
-        const id = this.getAttribute("data-id");
-        if (confirm("Deseja remover este compartilhamento?")) {
-            fetch("templates/remover_compartilhamento.php", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded"
-                },
-                body: `id_compartilhado=${id}`
-            })
-            .then(res => res.text())
-            .then(data => {
-                if (data.trim() === "OK") {
-                    location.reload();
-                } else {
-                    alert("Erro ao remover compartilhamento.");
-                }
-            });
-        }
-    });
-});
-
-document.addEventListener("DOMContentLoaded", function () {
-  const selecionarTudo = document.getElementById("selecionar_tudo");
-  const checkboxes = document.querySelectorAll("input[name='iniciativas[]']");
-
-  selecionarTudo.addEventListener("change", function () {
-    checkboxes.forEach(cb => cb.checked = selecionarTudo.checked);
-  });
-
-  checkboxes.forEach(cb => {
-    cb.addEventListener("change", () => {
-      const todosMarcados = Array.from(checkboxes).every(c => c.checked);
-      selecionarTudo.checked = todosMarcados;
-    });
-  });
-});
-
-</script>
