@@ -1,9 +1,7 @@
-document.querySelector('form').addEventListener('submit', function(e) {
-  const prefixo = document.getElementById('numero_contrato_prefixo').value.padStart(3, '0');
-  const ano = document.getElementById('numero_contrato_ano').value;
-  document.getElementById('numero_contrato').value = `${prefixo}/${ano}`;
-
-  const nomeIniciativa = document.querySelector('input[name="iniciativa"]').value;
+document.querySelector('form.formulario').addEventListener('submit', function () {
+  const p = (document.getElementById('numero_contrato_prefixo').value || '').padStart(3, '0');
+  const a = document.getElementById('numero_contrato_ano').value || '';
+  document.getElementById('numero_contrato').value = `${p}/${a}`;
 });
 
   const execucaoInput = document.querySelector('input[name="ib_execucao"]');
@@ -30,7 +28,7 @@ document.querySelector('form').addEventListener('submit', function(e) {
     if (temCamposPreenchidos()) {
       document.getElementById('modal-cancelar').classList.remove('hidden');
     } else {
-      window.location.href = 'index.php?page=home';
+      window.location.href = '../index.php?page=home';
     }
   }
 
@@ -42,7 +40,7 @@ document.querySelector('form').addEventListener('submit', function(e) {
   }
 
 document.getElementById('btn-sim').addEventListener('click', function() {
-    window.location.href = 'index.php?page=home';
+    window.location.href = '../index.php?page=home';
 });
 
 document.getElementById('btn-nao').addEventListener('click', function() {

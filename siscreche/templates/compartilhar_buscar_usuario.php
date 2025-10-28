@@ -1,5 +1,4 @@
 <?php
-// templates/compartilhar_buscar_usuario.php
 if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
 if (empty($_SESSION['id_usuario'])) { http_response_code(401); exit; }
 

@@ -1,82 +1,90 @@
 <?php
-if (session_status() !== PHP_SESSION_ACTIVE) {
-    session_start();
-}
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-include_once("config.php");
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+
+// AGORA na raiz, então o config está em /templates/config.php:
+require_once __DIR__ . "/templates/config.php";
+$conexao->set_charset('utf8mb4'); // só depois do include
 
 if (!isset($_SESSION['id_usuario'])) {
+    // você está na raiz agora, então não use "../"
     header('Location: login.php');
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
-    $iniciativa = trim($_POST['iniciativa']);
+    $iniciativa = trim($_POST['iniciativa'] ?? '');
     if (mb_strlen($iniciativa) > 255) {
         echo "<script>alert('Erro: O nome da iniciativa não pode ultrapassar 255 caracteres.'); window.history.back();</script>";
         exit;
     }
 
-    $check_query = "SELECT * FROM iniciativas WHERE iniciativa = '$iniciativa'";
-    $check_result = mysqli_query($conexao, $check_query);
-
-    if (mysqli_num_rows($check_result) > 0) {
+    $stmt = $conexao->prepare("SELECT 1 FROM iniciativas WHERE iniciativa = ?");
+    $stmt->bind_param("s", $iniciativa);
+    $stmt->execute();
+    $stmt->store_result();
+    if ($stmt->num_rows > 0) {
         echo "<script>alert('Erro: Já existe uma iniciativa com esse nome.'); window.history.back();</script>";
         exit;
     }
+    $stmt->close();
 
-    $data_vistoria = $_POST['data_vistoria'];
-    $numero_contrato = $_POST['numero_contrato'];
-    $ib_status = $_POST['ib_status'];
-    $ib_execucao = $_POST['ib_execucao'];
-    $ib_previsto = $_POST['ib_previsto'];
-    $ib_variacao = $_POST['ib_variacao'];
-    $ib_valor_medio = str_replace(['.', ','], ['', '.'], $_POST['ib_valor_medio']);
-    $ib_secretaria = $_POST['ib_secretaria'];
-    $ib_orgao = "CEHAB";
-    $ib_diretoria = $_POST['ib_diretoria'];
-    $ib_gestor_responsavel = $_POST['ib_gestor_responsavel'];
-    $ib_fiscal = $_POST['ib_fiscal'];
-    $ib_numero_processo_sei = $_POST['ib_numero_processo_sei'];
-    $objeto = mysqli_real_escape_string($conexao, $_POST['objeto']);
-    $informacoes_gerais = mysqli_real_escape_string($conexao, $_POST['informacoes_gerais']);
-    $observacoes = mysqli_real_escape_string($conexao, $_POST['observacoes']);
-    $id_usuario = $_SESSION['id_usuario'];
+    $data_vistoria          = $_POST['data_vistoria'] ?? null;
+    $numero_contrato        = $_POST['numero_contrato'] ?? null;
+    $ib_status              = $_POST['ib_status'] ?? null;
+    $ib_execucao            = $_POST['ib_execucao'] ?? null;
+    $ib_previsto            = $_POST['ib_previsto'] ?? null;
+    $ib_variacao            = $_POST['ib_variacao'] ?? null;
+    $ib_valor_medio         = isset($_POST['ib_valor_medio']) ? str_replace(['.', ','], ['', '.'], $_POST['ib_valor_medio']) : null;
+    $ib_secretaria          = $_POST['ib_secretaria'] !== '' ? $_POST['ib_secretaria'] : null;
+    $ib_orgao               = "CEHAB";
+    $ib_diretoria           = $_POST['ib_diretoria'] ?? null;
+    $ib_gestor_responsavel  = $_POST['ib_gestor_responsavel'] ?? null;
+    $ib_fiscal              = $_POST['ib_fiscal'] ?? null;
+    $ib_numero_processo_sei = $_POST['ib_numero_processo_sei'] ?? null;
+    $objeto                 = $_POST['objeto'] ?? null;
+    $informacoes_gerais     = $_POST['informacoes_gerais'] ?? null;
+    $observacoes            = $_POST['observacoes'] ?? null;
+    $id_usuario             = $_SESSION['id_usuario'];
 
-    $result = mysqli_query($conexao, "
-    INSERT INTO iniciativas (
-        id_usuario, iniciativa, data_vistoria, numero_contrato,
-        ib_status, ib_execucao, ib_previsto, ib_variacao,
-        ib_valor_medio, ib_secretaria, ib_orgao, ib_diretoria,
-        ib_gestor_responsavel, ib_fiscal, ib_numero_processo_sei,
-        objeto, informacoes_gerais, observacoes
-    ) VALUES (
-        '$id_usuario', '$iniciativa', '$data_vistoria', '$numero_contrato',
-        '$ib_status', '$ib_execucao', '$ib_previsto', '$ib_variacao',
-        '$ib_valor_medio', '$ib_secretaria', '$ib_orgao', '$ib_diretoria',
-        '$ib_gestor_responsavel', '$ib_fiscal', '$ib_numero_processo_sei',
-        '$objeto', '$informacoes_gerais', '$observacoes'
-    )
-");
+    $sql = "INSERT INTO iniciativas
+        (id_usuario, iniciativa, data_vistoria, numero_contrato,
+         ib_status, ib_execucao, ib_previsto, ib_variacao,
+         ib_valor_medio, ib_secretaria, ib_orgao, ib_diretoria,
+         ib_gestor_responsavel, ib_fiscal, ib_numero_processo_sei,
+         objeto, informacoes_gerais, observacoes)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
-if ($result) {
-    echo "
-    <script>
-        localStorage.setItem('iniciativaCriada', " . json_encode($iniciativa) . ");
-        window.location.href = 'index.php?page=formulario';
-    </script>";
-    exit;
-}
+    $stmt = $conexao->prepare($sql);
+    $stmt->bind_param(
+        "isssssssssssssssss", // i + 17 s
+        $id_usuario, $iniciativa, $data_vistoria, $numero_contrato,
+        $ib_status, $ib_execucao, $ib_previsto, $ib_variacao,
+        $ib_valor_medio, $ib_secretaria, $ib_orgao, $ib_diretoria,
+        $ib_gestor_responsavel, $ib_fiscal, $ib_numero_processo_sei,
+        $objeto, $informacoes_gerais, $observacoes
+    );
 
-    header("Location: index.php?page=formulario");
-    exit;
+    if ($stmt->execute()) {
+        echo "<script>
+            localStorage.setItem('iniciativaCriada', " . json_encode($iniciativa) . ");
+            window.location.href = 'index.php?page=home';
+        </script>";
+        exit;
+    } else {
+        echo "<script>alert('Erro ao salvar: ".addslashes($stmt->error)."'); window.history.back();</script>";
+        exit;
+    }
 }
 ?>
 
 <div class="pagina-formulario">
 
-<form class="formulario" action="index.php?page=formulario" method="post">
+<form class="formulario"
+      action="formulario.php"
+      method="post">
+
     <h1 class="main-title">Criar uma nova iniciativa</h1>
     <div class="linha">
       
@@ -273,6 +281,6 @@ if ($result) {
   </div>
 </div>
 
-<script src="js/formulario.js"></script>
+<script src="/CEHAB-Sistema-Monitoramento-02/siscreche/js/formulario.js"></script>
 </body>
 </html>
