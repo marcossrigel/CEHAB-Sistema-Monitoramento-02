@@ -50,6 +50,18 @@ $_SESSION['setor'] = $setorRaw; // mantém padronizado
 $setor = htmlspecialchars($setorRaw, ENT_QUOTES, 'UTF-8');
 
 $nome  = htmlspecialchars($_SESSION['nome'] ?? 'Usuário', ENT_QUOTES, 'UTF-8');
+$usuarioRede = $_SESSION['usuario_rede'] ?? null;
+
+if ($usuarioRede === null) {
+  $stmt = $conexao->prepare("SELECT usuario_rede FROM usuarios WHERE id_usuario = ?");
+  $stmt->bind_param('i', $id_usuario);
+  $stmt->execute();
+  $row = $stmt->get_result()->fetch_assoc();
+  $usuarioRede = $row['usuario_rede'] ?? '';
+  $_SESSION['usuario_rede'] = $usuarioRede; // cache
+}
+
+$usuarioRedeEsc = htmlspecialchars($usuarioRede ?: '—', ENT_QUOTES, 'UTF-8');
 
 /**
  * Iniciativas visíveis pelo usuário:
@@ -78,7 +90,9 @@ $iniciativas = $conexao->query($sql);
            class="h-8 w-auto object-contain select-none" draggable="false" />
       <div>
         <h1 class="text-slate-800 text-lg sm:text-xl font-semibold">Sistema de Monitoramento de Obras</h1>
-        <p class="text-xs text-slate-600">Olá, <?= $nome ?>!</p>
+        <p class="text-xs text-slate-600">
+          Olá, <?= $nome ?>! <span class="text-slate-500">usuário: <?= $usuarioRedeEsc ?></span>
+        </p>
       </div>
     </div>
 

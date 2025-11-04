@@ -94,7 +94,7 @@ else {
         'acompanhamento' => 'acompanhamento.css',
         'info_contratuais' => 'info_contratuais.css',
         'medicoes' => 'medicoes.css',
-        'cronogramamarcos' => 'cronogramamarcos.css',
+        'cronogramamarcos' => 'formulario.css',
         'solicitar_usuario' => 'formulario.css',
         'compartilhar' => 'formulario.css',
         'remover_compartilhamento' => 'formulario.css',

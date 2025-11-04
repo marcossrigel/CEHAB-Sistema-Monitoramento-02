@@ -1,29 +1,71 @@
 <?php
-// templates/compartilhar_modal.php
+// templates/compartilhar.php
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 if (session_status() !== PHP_SESSION_ACTIVE) { session_start(); }
-if (empty($_SESSION['id_usuario'])) { http_response_code(401); exit('Sem sessão'); }
 
-require_once __DIR__ . '/config.php';
+if (empty($_SESSION['id_usuario'])) {
+  http_response_code(401);
+  exit('Sem sessão ativa.');
+}
+
+require_once __DIR__ . '/config.php'; // garante $conexao
+
 $id_usuario = (int)$_SESSION['id_usuario'];
 
-// Suas iniciativas
-$sql_iniciativas = "SELECT id, iniciativa FROM iniciativas WHERE id_usuario = $id_usuario ORDER BY id DESC";
-$res_iniciativas = $conexao->query($sql_iniciativas);
+/* ===========================
+   1) Minhas iniciativas
+   =========================== */
+$sql_iniciativas = "SELECT id, iniciativa FROM iniciativas WHERE id_usuario = ? ORDER BY id DESC";
+$stmtIni = $conexao->prepare($sql_iniciativas);
+$stmtIni->bind_param('i', $id_usuario);
+$stmtIni->execute();
+$res_iniciativas = $stmtIni->get_result();
 
-// Já compartilhados
-$sql_compartilhados = "
-  SELECT DISTINCT u.nome AS nome_usuario, u.id_usuario
-    FROM compartilhamentos c
-    JOIN usuarios u ON u.id_usuario = c.id_compartilhado
-   WHERE c.id_dono = $id_usuario
-   ORDER BY u.nome
+/* ===========================
+   2) Já compartilhado (usuario + iniciativas)
+   =========================== */
+$sql_comp = "
+  SELECT 
+      u.id_usuario            AS id_usuario,
+      u.nome                  AS nome_usuario,
+      u.usuario_rede          AS usuario_rede,
+      i.id                    AS id_iniciativa,
+      i.iniciativa            AS nome_iniciativa
+  FROM compartilhamentos c
+  JOIN usuarios u    ON u.id_usuario = c.id_compartilhado
+  JOIN iniciativas i ON i.id = c.id_iniciativa
+  WHERE c.id_dono = ?
+  ORDER BY u.nome, i.iniciativa
 ";
-$res_comp = $conexao->query($sql_compartilhados);
+$stmtComp = $conexao->prepare($sql_comp);
+$stmtComp->bind_param('i', $id_usuario);
+$stmtComp->execute();
+$res_comp = $stmtComp->get_result();
+
+/* monta mapa: usuario => iniciativas[] */
+$compart_map = [];
+if ($res_comp && $res_comp->num_rows) {
+  while ($r = $res_comp->fetch_assoc()) {
+    $uid = (int)$r['id_usuario'];
+    if (!isset($compart_map[$uid])) {
+      $compart_map[$uid] = [
+        'nome'         => $r['nome_usuario'],
+        'usuario_rede' => $r['usuario_rede'],
+        'iniciativas'  => []
+      ];
+    }
+    $compart_map[$uid]['iniciativas'][] = [
+      'id'   => (int)$r['id_iniciativa'],
+      'nome' => $r['nome_iniciativa']
+    ];
+  }
+}
 ?>
+
 <div class="space-y-5">
   <h2 class="text-lg font-semibold text-slate-800">Compartilhar Iniciativas</h2>
 
@@ -74,28 +116,40 @@ $res_comp = $conexao->query($sql_compartilhados);
 
   <div>
     <div class="font-medium text-slate-800 mb-2">Já compartilhado com:</div>
-    <?php if ($res_comp && $res_comp->num_rows): ?>
-      <ul class="divide-y rounded-lg border bg-white">
-        <?php while ($l = $res_comp->fetch_assoc()): ?>
-          <ul class="lista-compartilhados divide-y divide-slate-200">
-            <?php while ($linha = $res_compartilhados->fetch_assoc()): ?>
-              <li class="flex items-center gap-2 py-2">
-                <img src="img/user.png"
-                    alt=""
-                    class="h-5 w-5 rounded-full shrink-0"
-                    loading="lazy" />
-                <span class="text-sm text-slate-800 flex-1 truncate">
-                  <?= htmlspecialchars($linha['nome_usuario']) ?>
-                </span>
-                <button class="cmp-remover text-red-600 hover:underline text-sm"
-                        data-id="<?= (int)$linha['id_usuario'] ?>">
-                  Remover
-                </button>
-              </li>
-            <?php endwhile; ?>
-          </ul>
 
-        <?php endwhile; ?>
+    <?php if (!empty($compart_map)): ?>
+      <ul class="divide-y rounded-lg border bg-white">
+        <?php foreach ($compart_map as $uid => $user): ?>
+          <li class="p-3">
+            <div class="flex items-center gap-2">
+              <img src="img/user.png" class="h-5 w-5 rounded-full shrink-0" alt="">
+              <div class="flex-1 min-w-0">
+                <div class="text-sm text-slate-800 truncate">
+                  <?= htmlspecialchars($user['nome']) ?>
+                  <?php if (!empty($user['usuario_rede'])): ?>
+                    <span class="text-slate-500">(@<?= htmlspecialchars($user['usuario_rede']) ?>)</span>
+                  <?php endif; ?>
+                </div>
+
+                <?php if (!empty($user['iniciativas'])): ?>
+                  <div class="mt-1 flex flex-wrap gap-1">
+                    <?php foreach ($user['iniciativas'] as $ini): ?>
+                      <span class="text-xs bg-slate-100 border rounded px-2 py-0.5">
+                        <?= htmlspecialchars($ini['nome']) ?>
+                      </span>
+                    <?php endforeach; ?>
+                  </div>
+                <?php endif; ?>
+              </div>
+
+              <button class="cmp-remover text-red-600 hover:underline text-sm"
+                      title="Remover todos os compartilhamentos com este usuário"
+                      data-id="<?= (int)$uid ?>">
+                Remover
+              </button>
+            </div>
+          </li>
+        <?php endforeach; ?>
       </ul>
     <?php else: ?>
       <div class="text-slate-500">Nenhum usuário ainda.</div>
