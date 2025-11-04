@@ -140,10 +140,20 @@ $iniciativas = $conexao->query($sql);
                 $previsto = htmlspecialchars($row['ib_previsto'] ?? '', ENT_QUOTES, 'UTF-8');
                 $variacao = htmlspecialchars($row['ib_variacao'] ?? '', ENT_QUOTES, 'UTF-8');
                 $contrato = htmlspecialchars($row['numero_contrato'] ?? '', ENT_QUOTES, 'UTF-8');
-                $dt       = htmlspecialchars($row['data_vistoria'] ?? '', ENT_QUOTES, 'UTF-8');
+
+                // >>> formata a data
+                $dtRaw = $row['data_vistoria'] ?? '';
+                $dtFmt = '';
+                if ($dtRaw) {
+                  $d = DateTime::createFromFormat('Y-m-d', $dtRaw);
+                  if ($d) $dtFmt = $d->format('d/m/Y');
+                }
+                $dt = htmlspecialchars($dtFmt, ENT_QUOTES, 'UTF-8');
+
                 $titulo   = htmlspecialchars($row['iniciativa'] ?? '', ENT_QUOTES, 'UTF-8');
                 $id       = (int)$row['id'];
               ?>
+
               <article
                 class="group cursor-pointer rounded-xl border border-slate-300 bg-slate-100 hover:border-blue-400 hover:shadow-md transition p-4"
                 data-id="<?= $id ?>"

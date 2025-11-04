@@ -31,7 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt->close();
 
     $data_vistoria          = $_POST['data_vistoria'] ?? null;
-    $numero_contrato        = $_POST['numero_contrato'] ?? null;
+    $numero_contrato = $_POST['numero_contrato'] ?? null;
+
+    if (!$numero_contrato) {
+        $p = preg_replace('/\D+/', '', $_POST['numero_contrato_prefixo'] ?? '');
+        $a = preg_replace('/\D+/', '', $_POST['numero_contrato_ano'] ?? '');
+        if ($p !== '' && $a !== '' && strlen($a) === 4) {
+            $numero_contrato = $p . '/' . $a;
+        }
+    }
     $ib_status              = $_POST['ib_status'] ?? null;
     $ib_execucao            = $_POST['ib_execucao'] ?? null;
     $ib_previsto            = $_POST['ib_previsto'] ?? null;

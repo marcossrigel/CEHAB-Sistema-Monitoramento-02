@@ -47,19 +47,34 @@ document.getElementById('btn-nao').addEventListener('click', function() {
   document.getElementById('modal-cancelar').classList.add('hidden');
 });
 
-document.addEventListener('DOMContentLoaded', function () {
-  const nomeCriada = localStorage.getItem('iniciativaCriada');
-  if (nomeCriada) {
-    const modal = document.getElementById('modal');
-    const message = document.getElementById('modal-message');
-    
-    if (modal && message) {
-      message.innerText = `Iniciativa "${nomeCriada}" criada com sucesso!`;
-      modal.classList.remove('hidden');
-    }
+document.addEventListener('DOMContentLoaded', () => {
+  const form  = document.querySelector('form.formulario');
+  if (!form) return;
 
-    localStorage.removeItem('iniciativaCriada');
+  const pref   = document.getElementById('numero_contrato_prefixo');
+  const ano    = document.getElementById('numero_contrato_ano');
+  const hidden = document.getElementById('numero_contrato');
+
+  function syncContrato() {
+    const p = (pref?.value || '').replace(/\D+/g, '').padStart(3, '0'); // 3 dígitos
+    const a = (ano?.value  || '').replace(/\D+/g, '');                  // 4 dígitos
+    hidden.value = (p && a.length === 4) ? `${p}/${a}` : '';
   }
+
+  // mantém sincronizado enquanto digita
+  pref?.addEventListener('input', syncContrato);
+  ano ?.addEventListener('input', syncContrato);
+
+  // garante antes de enviar
+  form.addEventListener('submit', () => {
+    syncContrato();
+    // (opcional) validação
+    if (!hidden.value.match(/^\d{3}\/\d{4}$/)) {
+      // Se quiser bloquear quando estiver inválido, descomente:
+      // event.preventDefault();
+      // alert('Preencha o nº do contrato no formato 000/2025');
+    }
+  });
 });
 
 execucaoInput.addEventListener('input', calcularVariacao);

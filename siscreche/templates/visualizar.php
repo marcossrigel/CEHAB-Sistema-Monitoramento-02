@@ -46,7 +46,7 @@ $res = $stmt->get_result();
 <header class="sticky top-0 inset-x-0 z-50 bg-white border-b shadow-sm">
   <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <img src="./img/logo.png" class="h-8 w-auto" alt="CEHAB">
+      <img src="./img/logo.png" class="h-12 md:h-14 w-auto object-contain" alt="CEHAB">
       <div>
         <h1 class="text-slate-800 text-lg sm:text-xl font-semibold">
           Sistema de Monitoramento de Obras
