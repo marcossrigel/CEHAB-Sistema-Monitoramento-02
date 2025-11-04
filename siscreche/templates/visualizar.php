@@ -39,8 +39,11 @@ $res = $stmt->get_result();
 ?>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; } /* tira a “borda” nas laterais e no topo */
+</style>
 
-<header class="w-full border-b bg-white shadow-sm">
+<header class="sticky top-0 inset-x-0 z-50 bg-white border-b shadow-sm">
   <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
     <div class="flex items-center gap-3">
       <img src="./img/logo.png" class="h-8 w-auto" alt="CEHAB">
