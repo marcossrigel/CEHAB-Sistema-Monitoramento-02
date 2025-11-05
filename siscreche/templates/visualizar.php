@@ -6,13 +6,11 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
   header('Location: login.php'); exit;
 }
 
-// diretoria vinda do link (use os mesmos valores que estão gravados no BD)
 $permitidas = ['Educacao','Saude','Seguranca','Infra Estrategicas','Infra Grandes Obras','Social'];
 
 $diretoria = $_GET['diretoria'] ?? '';
 $diretoria = trim($diretoria);
 
-// normaliza espaços múltiplos e remove tags
 $diretoria = preg_replace('/\s+/', ' ', $diretoria);
 $diretoria = strip_tags($diretoria);
 
@@ -22,7 +20,6 @@ if (!in_array($diretoria, $permitidas, true)) {
   exit;
 }
 
-// busca TODAS as iniciativas da diretoria (independe de dono/compart.)
 $stmt = $conexao->prepare(
   "SELECT id, iniciativa, data_vistoria, numero_contrato,
           ib_status, ib_execucao, ib_previsto, ib_variacao,
@@ -40,7 +37,7 @@ $res = $stmt->get_result();
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  html, body { margin: 0; padding: 0; } /* tira a “borda” nas laterais e no topo */
+  html, body { margin: 0; padding: 0; } 
 </style>
 
 <header class="sticky top-0 inset-x-0 z-50 bg-white border-b shadow-sm">
@@ -79,25 +76,25 @@ $res = $stmt->get_result();
         </div>
       </div>
 
-      <!-- partials/modal_detalhes.php -->
-<!-- MODAL DETALHES (igual ao print) -->
 <div id="modalDetalhes" class="fixed inset-0 z-50 hidden">
-  <!-- backdrop -->
+  <!-- overlay -->
   <button class="absolute inset-0 bg-black/40" data-close-modal aria-label="Fechar"></button>
 
-  <!-- card -->
-  <div class="relative mx-auto mt-10 w-[96%] max-w-5xl">
-    <div class="rounded-2xl border border-slate-200 bg-white shadow-2xl">
-      <!-- Cabeçalho -->
-      <div class="flex items-center justify-between px-6 py-4 border-b">
+  <!-- wrapper do modal -->
+  <div class="relative mx-auto my-6 w-[96%] max-w-5xl">
+    <!-- cartão do modal com altura limitada e layout em coluna -->
+    <div class="flex max-h-[85vh] flex-col rounded-2xl border border-slate-200 bg-white shadow-2xl">
+
+      <!-- header fixo -->
+      <div class="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b bg-white">
         <h3 class="text-lg font-semibold text-slate-800" data-f="title">—</h3>
         <div class="flex items-center gap-6">
           <button type="button" class="text-slate-600 hover:underline" data-btn-close>Fechar ×</button>
         </div>
       </div>
 
-      <!-- Corpo -->
-      <div class="px-6 py-5 text-sm text-slate-800">
+      <!-- CONTEÚDO ROLÁVEL -->
+      <div class="flex-1 overflow-y-auto px-6 py-5 text-sm text-slate-800">
         <div class="grid sm:grid-cols-2 gap-x-10 gap-y-3">
           <div><span class="text-slate-500">Data da Atualização:</span> <span class="font-medium" data-f="data_vistoria">—</span></div>
           <div><span class="text-slate-500">Nº do Contrato:</span> <span class="font-medium" data-f="contrato">—</span></div>
@@ -133,8 +130,8 @@ $res = $stmt->get_result();
         </div>
       </div>
 
-      <!-- Rodapé com botões -->
-      <div class="px-6 pb-6">
+      <!-- footer fixo -->
+      <div class="sticky bottom-0 z-10 px-6 pb-6 pt-4 bg-white border-t">
         <div class="grid sm:grid-cols-2 gap-4">
           <a data-link="pendencias" class="flex items-center justify-center rounded-2xl border px-4 py-3 bg-slate-50 hover:bg-slate-100 transition">
             🛠️ <span class="ml-2 font-medium text-slate-800">Acompanhar Pendências</span>
@@ -156,6 +153,7 @@ $res = $stmt->get_result();
           </button>
         </div>
       </div>
+
     </div>
   </div>
 </div>
@@ -166,15 +164,23 @@ $res = $stmt->get_result();
           <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" id="cardsIniciativas">
             <?php while ($row = $res->fetch_assoc()): ?>
               <?php
-                $id       = (int)$row['id'];
-                $titulo   = htmlspecialchars($row['iniciativa'] ?? '', ENT_QUOTES, 'UTF-8');
-                $contrato = htmlspecialchars($row['numero_contrato'] ?? '', ENT_QUOTES, 'UTF-8');
-                $dt       = htmlspecialchars($row['data_vistoria'] ?? '', ENT_QUOTES, 'UTF-8');
-                $status   = htmlspecialchars($row['ib_status'] ?? '', ENT_QUOTES, 'UTF-8');
-                $exec     = htmlspecialchars($row['ib_execucao'] ?? '', ENT_QUOTES, 'UTF-8');
-                $prev     = htmlspecialchars($row['ib_previsto'] ?? '', ENT_QUOTES, 'UTF-8');
-                $var      = htmlspecialchars($row['ib_variacao'] ?? '', ENT_QUOTES, 'UTF-8');
+              $id       = (int)$row['id'];
+              $titulo   = htmlspecialchars($row['iniciativa'] ?? '', ENT_QUOTES, 'UTF-8');
+              $contrato = htmlspecialchars($row['numero_contrato'] ?? '', ENT_QUOTES, 'UTF-8');
+              $dtRaw = $row['data_vistoria'] ?? '';
+              $dtFmt = '';
+              if ($dtRaw) {
+                $d = DateTime::createFromFormat('Y-m-d', $dtRaw);
+                if ($d) $dtFmt = $d->format('d/m/Y');
+              }
+              $dt = htmlspecialchars($dtFmt, ENT_QUOTES, 'UTF-8');
+
+              $status = htmlspecialchars($row['ib_status'] ?? '', ENT_QUOTES, 'UTF-8');
+              $exec   = htmlspecialchars($row['ib_execucao'] ?? '', ENT_QUOTES, 'UTF-8');
+              $prev   = htmlspecialchars($row['ib_previsto'] ?? '', ENT_QUOTES, 'UTF-8');
+              $var    = htmlspecialchars($row['ib_variacao'] ?? '', ENT_QUOTES, 'UTF-8');
               ?>
+
               <article
                 class="group cursor-pointer rounded-xl border border-slate-300 bg-slate-100 hover:border-blue-400 hover:shadow-md transition p-4"
                 data-id="<?= $id ?>"
@@ -245,7 +251,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Clique em qualquer lugar do card OU no botão "Detalhes"
   container.addEventListener('click', (ev) => {
     const btn = ev.target.closest('[data-open-detalhes]');
     const card = btn ? btn.closest('article[data-id]')
@@ -255,7 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
     tryOpen(card);
   });
 
-  // Acessível
   container.addEventListener('keydown', (ev) => {
     const card = ev.target.closest('article[data-id]');
     if (!card) return;
@@ -266,13 +270,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ==== script do modal ====
 (function () {
   const modal   = document.getElementById('modalDetalhes');
   const closeEl = modal.querySelector('[data-close-modal]');
   const btnX    = modal.querySelector('[data-btn-close]');
 
-  // Mapa dos botões/links do rodapé do modal
   const links = {
     pendencias: modal.querySelector('[data-link="pendencias"]'),
     projeto:    modal.querySelector('[data-link="projeto_licitacao"]'),
@@ -281,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
     cronograma: modal.querySelector('[data-link="cronograma"]'),
   };
 
-  let currentId = null; // <— precisa existir
+  let currentId = null;
 
   function set(el, value) {
     el.textContent = value && String(value).trim() ? value : '—';
@@ -307,7 +309,6 @@ document.addEventListener('DOMContentLoaded', () => {
     set(modal.querySelector('[data-f="info"]'),          d.info);
     set(modal.querySelector('[data-f="obs"]'),           d.obs);
 
-    // Defina os HREFs (arquivo direto)
     if (links.pendencias) links.pendencias.href = `index.php?page=acompanhamento&id_iniciativa=${encodeURIComponent(currentId)}`;
     if (links.projeto)    links.projeto.href    = `index.php?page=projeto_licitacoes&id_iniciativa=${encodeURIComponent(currentId)}`;
     if (links.info)       links.info.href       = `index.php?page=info_contratuais&id_iniciativa=${encodeURIComponent(currentId)}`;
@@ -334,7 +335,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Escape' && !modal.classList.contains('hidden')) close();
   });
 
-  // expõe para o listar abrir
   window.openWith = open;
 })();
 </script>

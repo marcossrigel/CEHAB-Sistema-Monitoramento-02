@@ -56,8 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const hidden = document.getElementById('numero_contrato');
 
   function syncContrato() {
-    const p = (pref?.value || '').replace(/\D+/g, '').padStart(3, '0'); // 3 dígitos
-    const a = (ano?.value  || '').replace(/\D+/g, '');                  // 4 dígitos
+    const p = (pref?.value || '').replace(/\D+/g, '').padStart(3, '0'); 
+    const a = (ano?.value  || '').replace(/\D+/g, '');
     hidden.value = (p && a.length === 4) ? `${p}/${a}` : '';
   }
 
