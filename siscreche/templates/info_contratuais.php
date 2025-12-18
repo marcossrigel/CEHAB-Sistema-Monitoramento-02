@@ -158,7 +158,7 @@ if (isset($_POST['salvar'])) {
         ");
     }
 
-    header("Location: index.php?page=info_contratuais&id_iniciativa=$id_iniciativa");
+    header("Location: index.php?page=home&open=detalhes&id_iniciativa=$id_iniciativa");
     exit;
 }
 
@@ -176,7 +176,7 @@ if ($tipo_usuario === 'admin') {
     ? 'index.php?page=visualizar&diretoria=' . rawurlencode($diretoria)
     : 'index.php?page=diretorias';
 } else {
-  $url_voltar = 'index.php?page=home';
+  $url_voltar = 'index.php?page=home&open=detalhes&id_iniciativa=' . $id_iniciativa;
 }
 
 ?>

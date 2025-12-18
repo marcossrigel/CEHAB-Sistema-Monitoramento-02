@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['etapa'])) {
         mysqli_query($conexao, $sql);
     }
 
-    header("Location: index.php?page=projeto_licitacoes&id_iniciativa=$id_iniciativa");
+    header("Location: index.php?page=home&open=detalhes&id_iniciativa=$id_iniciativa");
     exit;
 }
 
@@ -122,7 +122,7 @@ if ($tipo_usuario === 'admin') {
     ? 'index.php?page=visualizar&diretoria=' . rawurlencode($diretoria)
     : 'index.php?page=diretorias';
 } else {
-  $url_voltar = 'index.php?page=home';
+  $url_voltar = 'index.php?page=home&open=detalhes&id_iniciativa=' . $id_iniciativa;
 }
 ?>
 

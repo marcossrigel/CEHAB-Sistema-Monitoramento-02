@@ -3,12 +3,10 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
-// AGORA na raiz, então o config está em /templates/config.php:
 require_once __DIR__ . "/templates/config.php";
-$conexao->set_charset('utf8mb4'); // só depois do include
+$conexao->set_charset('utf8mb4');
 
 if (!isset($_SESSION['id_usuario'])) {
-    // você está na raiz agora, então não use "../"
     header('Location: login.php');
     exit;
 }

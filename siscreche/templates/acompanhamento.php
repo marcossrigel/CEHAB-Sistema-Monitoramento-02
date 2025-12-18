@@ -99,16 +99,12 @@ $dados_pendencias = mysqli_query(
    ORDER BY id ASC"
 );
 
-// URL do botão Voltar
 if ($tipo_usuario === 'admin') {
-  // Admin volta para a lista da mesma diretoria (visualizar.php)
   $url_voltar = 'index.php?page=visualizar&diretoria=' . rawurlencode($diretoria ?: 'Educacao');
-  // Se preferir voltar para o grid de diretorias, use:
-  // $url_voltar = 'index.php?page=diretorias';
 } else {
-  // Usuário comum volta para a home dele
-  $url_voltar = 'index.php?page=home';
+  $url_voltar = 'index.php?page=home&open=detalhes&id_iniciativa=' . $id_iniciativa;
 }
+
 ?>
 
 <div class="table-container">

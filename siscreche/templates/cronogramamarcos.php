@@ -7,7 +7,7 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 }
 
 if (!isset($_SESSION['id_usuario'])) {
-    header('Location: login.php');
+    header("Location: index.php?page=home&open=detalhes&id_iniciativa=$id_iniciativa");
     exit;
 }
 
@@ -124,7 +124,7 @@ if ($tipo_usuario === 'admin') {
     ? 'index.php?page=visualizar&diretoria=' . rawurlencode($diretoria)
     : 'index.php?page=diretorias';
 } else {
-  $url_voltar = 'index.php?page=home';
+  $url_voltar = 'index.php?page=home&open=detalhes&id_iniciativa=' . $id_iniciativa;
 }
 
 function formatarParaBrasileiro($valor) {

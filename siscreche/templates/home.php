@@ -11,11 +11,6 @@ if (empty($_SESSION['id_usuario'])) {
 
 $id_usuario = (int)($_SESSION['id_usuario'] ?? 0);
 
-/**
- * Fonte do “setor”: tente primeiro diretoria da sessão (vinda do login),
- * depois $_SESSION['setor'], senão mostra “—”.
- * (Não faz SELECT em coluna inexistente.)
- */
 $setorRaw = $_SESSION['diretoria'] ?? ($_SESSION['setor'] ?? '—');
 
 $setoresMap = [
@@ -621,7 +616,7 @@ function toast(msg, type='ok') {
     const get = (k) => el.dataset[k] || '—';
     det_titulo.textContent     = get('iniciativa');
     det_data.textContent       = get('data_vistoria');
-    det_contrato.textContent   = get('contrato');
+    det_contrato.textContent = get('contrato');
     det_status.textContent     = get('status');
     det_execucao.textContent   = get('execucao');
     det_previsto.textContent   = get('previsto');
@@ -651,6 +646,12 @@ function toast(msg, type='ok') {
       window.location.href = 'index.php?page=cronogramamarcos&id_iniciativa=' + currentId;
     document.getElementById('btnConcluida').onclick = markDone;
   }
+
+  // expõe uma função global para abrir o modal por id
+  window.openDetalhesById = (id) => {
+    const card = document.querySelector(`article[data-id="${id}"]`);
+    if (card) openWith(card);
+  };
 
   function enterEditMode() {
     if (isEditing) return;
@@ -829,6 +830,22 @@ function toast(msg, type='ok') {
     if (e.key === 'Escape') modal?.classList.add('hidden');
   });
 })();
+
+document.addEventListener('DOMContentLoaded', () => {
+  const url = new URL(window.location.href);
+  const open = url.searchParams.get('open');
+  const id   = url.searchParams.get('id_iniciativa');
+
+  if (open === 'detalhes' && id) {
+    window.openDetalhesById(id);
+
+    // opcional: limpa a URL pra não reabrir no F5
+    url.searchParams.delete('open');
+    url.searchParams.delete('id_iniciativa');
+    history.replaceState({}, '', url.toString());
+  }
+});
+
 
 
 </script>
