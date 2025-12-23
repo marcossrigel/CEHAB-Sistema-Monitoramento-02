@@ -62,16 +62,21 @@ $usuarioRedeEsc = htmlspecialchars($usuarioRede ?: '—', ENT_QUOTES, 'UTF-8');
  * - criadas por ele OU
  * - compartilhadas com ele.
  */
-$sql = "SELECT *
-          FROM iniciativas
-         WHERE id_usuario = $id_usuario
-            OR EXISTS (
-                 SELECT 1
-                   FROM compartilhamentos c
-                  WHERE c.id_iniciativa = iniciativas.id
-                    AND c.id_compartilhado = $id_usuario
-               )
-         ORDER BY id DESC";
+$sql = "SELECT i.*,
+               COALESCE((
+                 SELECT SUM(m.valor_bm)
+                 FROM medicoes m
+                 WHERE m.id_iniciativa = i.id
+               ), 0) AS valor_acumulado
+        FROM iniciativas i
+        WHERE i.id_usuario = $id_usuario
+           OR EXISTS (
+                SELECT 1
+                  FROM compartilhamentos c
+                 WHERE c.id_iniciativa = i.id
+                   AND c.id_compartilhado = $id_usuario
+              )
+        ORDER BY i.id DESC";
 $iniciativas = $conexao->query($sql);
 
 function money_br($v){
@@ -138,7 +143,7 @@ function money_br($v){
                 $execucao = $row['ib_execucao'] ?? '';
                 $previsto = $row['ib_previsto'] ?? '';
                 $contrato = htmlspecialchars($row['numero_contrato'] ?? '', ENT_QUOTES, 'UTF-8');
-                $valorAcumuladoFmt = money_br($row['ib_valor_medio'] ?? 0);
+                $valorAcumuladoFmt = money_br($row['valor_acumulado'] ?? 0);
 
                 // --- cálculo da variação (previsto - execução) ---
                 $execFloat = ($execucao !== '' && $execucao !== null) ? (float)$execucao : null;
