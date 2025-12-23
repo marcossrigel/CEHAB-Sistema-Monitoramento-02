@@ -84,4 +84,3 @@ function deleteRow() {
     row.remove(); // Apenas remove visualmente
   }
 }
-

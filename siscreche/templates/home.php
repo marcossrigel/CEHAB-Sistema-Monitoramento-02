@@ -10,7 +10,6 @@ if (empty($_SESSION['id_usuario'])) {
 }
 
 $id_usuario = (int)($_SESSION['id_usuario'] ?? 0);
-
 $setorRaw = $_SESSION['diretoria'] ?? ($_SESSION['setor'] ?? '—');
 
 $setoresMap = [
@@ -74,6 +73,11 @@ $sql = "SELECT *
                )
          ORDER BY id DESC";
 $iniciativas = $conexao->query($sql);
+
+function money_br($v){
+  if ($v === null || $v === '') return 'R$ 0,00';
+  return 'R$ '.number_format((float)$v, 2, ',', '.');
+}
 ?>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -131,10 +135,32 @@ $iniciativas = $conexao->query($sql);
             <?php while ($row = $iniciativas->fetch_assoc()): ?>
               <?php
                 $status   = htmlspecialchars($row['ib_status'] ?? '', ENT_QUOTES, 'UTF-8');
-                $execucao = htmlspecialchars($row['ib_execucao'] ?? '', ENT_QUOTES, 'UTF-8');
-                $previsto = htmlspecialchars($row['ib_previsto'] ?? '', ENT_QUOTES, 'UTF-8');
-                $variacao = htmlspecialchars($row['ib_variacao'] ?? '', ENT_QUOTES, 'UTF-8');
+                $execucao = $row['ib_execucao'] ?? '';
+                $previsto = $row['ib_previsto'] ?? '';
                 $contrato = htmlspecialchars($row['numero_contrato'] ?? '', ENT_QUOTES, 'UTF-8');
+                $valorAcumuladoFmt = money_br($row['ib_valor_medio'] ?? 0);
+
+                // --- cálculo da variação (previsto - execução) ---
+                $execFloat = ($execucao !== '' && $execucao !== null) ? (float)$execucao : null;
+                $prevFloat = ($previsto !== '' && $previsto !== null) ? (float)$previsto : null;
+                $variacaoFloat = null;
+
+                if ($execFloat !== null && $prevFloat !== null) {
+                    $variacaoFloat = $prevFloat - $execFloat;
+                }
+
+                // strings formatadas para exibir / usar nos data-attributes
+                $execStr = ($execFloat !== null)
+                    ? number_format($execFloat, 1, ',', '.') . '%'
+                    : '—';
+
+                $prevStr = ($prevFloat !== null)
+                    ? number_format($prevFloat, 1, ',', '.') . '%'
+                    : '—';
+
+                $varStr = ($variacaoFloat !== null)
+                    ? number_format($variacaoFloat, 1, ',', '.') . '%'
+                    : '—';
 
                 // >>> formata a data
                 $dtRaw = $row['data_vistoria'] ?? '';
@@ -145,8 +171,8 @@ $iniciativas = $conexao->query($sql);
                 }
                 $dt = htmlspecialchars($dtFmt, ENT_QUOTES, 'UTF-8');
 
-                $titulo   = htmlspecialchars($row['iniciativa'] ?? '', ENT_QUOTES, 'UTF-8');
-                $id       = (int)$row['id'];
+                $titulo = htmlspecialchars($row['iniciativa'] ?? '', ENT_QUOTES, 'UTF-8');
+                $id     = (int)$row['id'];
               ?>
 
               <article
@@ -155,11 +181,11 @@ $iniciativas = $conexao->query($sql);
                 data-iniciativa="<?= $titulo ?>"
                 data-data_vistoria="<?= $dt ?>"
                 data-status="<?= $status ?>"
-                data-execucao="<?= $execucao ?>"
-                data-previsto="<?= $previsto ?>"
-                data-variacao="<?= $variacao ?>"
+                data-execucao="<?= htmlspecialchars($execStr, ENT_QUOTES, 'UTF-8') ?>"
+                data-previsto="<?= htmlspecialchars($prevStr, ENT_QUOTES, 'UTF-8') ?>"
+                data-variacao="<?= htmlspecialchars($varStr, ENT_QUOTES, 'UTF-8') ?>"
                 data-contrato="<?= $contrato ?>"
-                data-valor_medio="<?= htmlspecialchars($row['ib_valor_medio'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                data-valor_medio="<?= htmlspecialchars($valorAcumuladoFmt, ENT_QUOTES, 'UTF-8') ?>"
                 data-secretaria="<?= htmlspecialchars($row['ib_secretaria'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                 data-diretoria="<?= htmlspecialchars($row['ib_diretoria'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                 data-gestor="<?= htmlspecialchars($row['ib_gestor_responsavel'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
@@ -180,9 +206,17 @@ $iniciativas = $conexao->query($sql);
                     <?= $status ?: 'Sem status' ?>
                   </span>
                   <span class="text-slate-700">Exec:</span>
-                  <span class="font-medium"><?= $execucao ?: '—' ?></span>
+                    <?php
+                      if ($execucao !== null && $execucao !== '') {
+                          echo number_format((float)$execucao, 1, ',', '.') . '%';
+                      } else {
+                          echo '—';
+                      }
+                    ?>
+                  </span>
                   <span class="text-slate-700">Prev:</span>
-                  <span class="font-medium"><?= $previsto ?: '—' ?></span>
+                  <span class="font-medium"><?= $prevStr ?></span>
+                  
                 </div>
 
                 <footer class="mt-3 flex items-center justify-between">
@@ -193,6 +227,7 @@ $iniciativas = $conexao->query($sql);
                 </footer>
               </article>
             <?php endwhile; ?>
+
           </div>
         <?php else: ?>
           <div class="rounded-lg border border-dashed p-8 text-center text-slate-400">
@@ -214,7 +249,7 @@ $iniciativas = $conexao->query($sql);
         <button type="button" class="rounded-lg px-3 py-1.5 text-slate-800 hover:bg-slate-100" data-close-modal>Fechar ×</button>
       </div>
 
-      <form class="px-6 py-5 space-y-6" action="formulario.php" method="post" id="formIniciativa">
+      <form class="px-6 py-5 space-y-6" action="templates/criar_iniciativa.php" method="post" id="formIniciativa">
         <div class="grid md:grid-cols-3 gap-4">
           <div class="md:col-span-2">
             <label class="block text-sm font-medium text-slate-700 mb-1">Nome da Iniciativa</label>
@@ -299,7 +334,7 @@ $iniciativas = $conexao->query($sql);
             </div>
             <div>
               <label class="block text-sm text-slate-700 mb-1">% Previsto</label>
-              <input type="text" name="ib_previsto" class="w-full border rounded-lg px-3 py-2">
+              <input type="text" name="ib_previsto" class="w-full border rounded-lg px-3 py-2" required>
             </div>
             <div>
               <label class="block text-sm text-slate-700 mb-1">% Variação</label>
@@ -316,18 +351,17 @@ $iniciativas = $conexao->query($sql);
                        maxlength="4" placeholder="2025" pattern="\d{4}" required
                        class="border rounded-lg px-2 py-2 text-center w-[84px] shrink-0">
               </div>
-              <input type="hidden" name="numero_contrato" id="numero_contrato">
             </div>
           </div>
 
           <div class="grid md:grid-cols-5 gap-4 mt-4 [&>div]:min-w-0">
             <div>
               <label class="block text-sm text-slate-700 mb-1">Valor Acumulado</label>
-              <input type="text" name="ib_valor_medio" class="w-full border rounded-lg px-3 py-2">
+              <input type="text" name="ib_valor_medio" class="w-full border rounded-lg px-3 py-2" placeholder="visualização" readonly>
             </div>
             <div>
               <label class="block text-sm text-slate-700 mb-1">Secretaria</label>
-              <input type="text" name="ib_secretaria" class="w-full border rounded-lg px-3 py-2" placeholder="Digite a secretaria">
+              <input type="text" name="ib_secretaria" class="w-full border rounded-lg px-3 py-2" placeholder="Digite a secretaria" required>
             </div>
             <div>
               <label class="block text-sm text-slate-700 mb-1">Diretoria</label>
@@ -343,11 +377,11 @@ $iniciativas = $conexao->query($sql);
             </div>
             <div>
               <label class="block text-sm text-slate-700 mb-1">Gestor Responsável</label>
-              <input type="text" name="ib_gestor_responsavel" class="w-full border rounded-lg px-3 py-2">
+              <input type="text" name="ib_gestor_responsavel" class="w-full border rounded-lg px-3 py-2" required>
             </div>
             <div>
               <label class="block text-sm text-slate-700 mb-1">Fiscal Responsável</label>
-              <input type="text" name="ib_fiscal" class="w-full border rounded-lg px-3 py-2">
+              <input type="text" name="ib_fiscal" class="w-full border rounded-lg px-3 py-2" required>
             </div>
           </div>
         </div>
@@ -403,7 +437,7 @@ $iniciativas = $conexao->query($sql);
           <p><span class="text-slate-700">% Previsto:</span> <span class="font-medium" id="det_previsto"></span></p>
           <p><span class="text-slate-700">% Variação:</span> <span class="font-medium" id="det_variacao"></span></p>
           <p><span class="text-slate-700">Valor Acumulado:</span> <span class="font-medium" id="det_valor"></span></p>
-          <p><span class="text-slate-700">Secretaria:</span> <span class="font-medium" id="det_secretaria"></span></p>
+          <p><span class="text-slate-700">Secretaria:</span> <span class="font-medium" id="det_secretaria" ></span></p>
           <p><span class="text-slate-700">Diretoria:</span> <span class="font-medium" id="det_diretoria"></span></p>
           <p><span class="text-slate-700">Gestor:</span> <span class="font-medium" id="det_gestor"></span></p>
           <p><span class="text-slate-700">Fiscal:</span> <span class="font-medium" id="det_fiscal"></span></p>
@@ -480,6 +514,17 @@ $iniciativas = $conexao->query($sql);
 /* ===== Abertura dos modais do topo ===== */
 document.querySelector('[data-action="criar"]')?.addEventListener('click', () => {
   document.getElementById('modalIniciativa')?.classList.remove('hidden');
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const open = params.get('open');
+  const id = params.get('id_iniciativa');
+
+  if (open === 'detalhes' && id) {
+    const card = document.querySelector(`article[data-id="${CSS.escape(id)}"]`);
+    if (card) card.click();
+  }
 });
 
 document.querySelector('[data-action="compartilhar"]')?.addEventListener('click', async () => {
@@ -588,35 +633,18 @@ function toast(msg, type='ok') {
 }
 
 /* ===== Modal de Detalhes (com edição) ===== */
+/* ===== Modal de Detalhes (apenas visual + ir pra tela de edição) ===== */
 (function() {
   const modal = document.getElementById('modalDetalhes');
-
-  const FIELD_MAP = {
-    data_vistoria : { elId: 'det_data',        type: 'date' },
-    numero_contrato: { elId: 'det_contrato',   type: 'text' },
-    ib_status     : { elId: 'det_status',      type: 'select', options: ['Em Execução', 'Paralizado', 'Concluido'] },
-    ib_execucao   : { elId: 'det_execucao',    type: 'text' },
-    ib_previsto   : { elId: 'det_previsto',    type: 'text' },
-    ib_variacao   : { elId: 'det_variacao',    type: 'text' },
-    ib_valor_medio: { elId: 'det_valor',       type: 'text' },
-    ib_secretaria : { elId: 'det_secretaria',  type: 'text' },
-    ib_diretoria  : { elId: 'det_diretoria',   type: 'text' },
-    ib_gestor_responsavel: { elId: 'det_gestor', type: 'text' },
-    ib_fiscal     : { elId: 'det_fiscal',      type: 'text' },
-    objeto        : { elId: 'det_objeto',      type: 'textarea' },
-    informacoes_gerais: { elId: 'det_info',    type: 'textarea' },
-    observacoes   : { elId: 'det_obs',         type: 'textarea' },
-  };
-
-  let originalValues = {};
-  let isEditing = false;
   let currentId = null;
 
+  // Abre o modal preenchendo os spans com os data-atributes do card
   function openWith(el) {
     const get = (k) => el.dataset[k] || '—';
+
     det_titulo.textContent     = get('iniciativa');
     det_data.textContent       = get('data_vistoria');
-    det_contrato.textContent = get('contrato');
+    det_contrato.textContent   = get('contrato');
     det_status.textContent     = get('status');
     det_execucao.textContent   = get('execucao');
     det_previsto.textContent   = get('previsto');
@@ -631,149 +659,41 @@ function toast(msg, type='ok') {
     det_obs.textContent        = get('obs');
 
     currentId = el.dataset.id;
-    leaveEditMode(true);
     modal.classList.remove('hidden');
 
+    wireButtons();
+  }
+
+  // Configura os botões do rodapé do modal para irem às telas corretas
+  function wireButtons() {
+    if (!currentId) return;
+    const base = 'index.php';
+
     document.getElementById('btnPendencias').onclick = () =>
-      window.location.href = 'index.php?page=acompanhamento&id_iniciativa=' + currentId;
+      window.location.href = base + '?page=acompanhamento&id_iniciativa=' + encodeURIComponent(currentId);
+
     document.getElementById('btnProjeto').onclick = () =>
-      window.location.href = 'index.php?page=projeto_licitacoes&id_iniciativa=' + currentId;
+      window.location.href = base + '?page=projeto_licitacoes&id_iniciativa=' + encodeURIComponent(currentId);
+
     document.getElementById('btnContratuais').onclick = () =>
-      window.location.href = 'index.php?page=info_contratuais&id_iniciativa=' + currentId;
+      window.location.href = base + '?page=info_contratuais&id_iniciativa=' + encodeURIComponent(currentId);
+
     document.getElementById('btnMedicoes').onclick = () =>
-      window.location.href = 'index.php?page=medicoes&id_iniciativa=' + currentId;
+      window.location.href = base + '?page=medicoes&id_iniciativa=' + encodeURIComponent(currentId);
+
     document.getElementById('btnCronograma').onclick = () =>
-      window.location.href = 'index.php?page=cronogramamarcos&id_iniciativa=' + currentId;
+      window.location.href = base + '?page=cronogramamarcos&id_iniciativa=' + encodeURIComponent(currentId);
+
+    // ✅ AQUI: Editar leva para outra página
+    document.getElementById('btnEditarDetalhes').onclick = () =>
+      window.location.href = base + '?page=editar_iniciativa&id_iniciativa=' + encodeURIComponent(currentId);
+
     document.getElementById('btnConcluida').onclick = markDone;
   }
 
-  // expõe uma função global para abrir o modal por id
-  window.openDetalhesById = (id) => {
-    const card = document.querySelector(`article[data-id="${id}"]`);
-    if (card) openWith(card);
-  };
-
-  function enterEditMode() {
-    if (isEditing) return;
-    isEditing = true;
-
-    originalValues = {};
-    for (const [name, cfg] of Object.entries(FIELD_MAP)) {
-      const span = document.getElementById(cfg.elId);
-      const raw = (span.textContent || '').trim();
-      originalValues[name] = raw === '—' ? '' : raw;
-
-      let input;
-      if (cfg.type === 'textarea') {
-        input = document.createElement('textarea');
-        input.className = 'w-full min-h-[80px] border rounded-lg px-2 py-1';
-        input.value = originalValues[name];
-      } else if (cfg.type === 'select') {
-        input = document.createElement('select');
-        input.className = 'border rounded-lg px-2 py-1';
-        (cfg.options || []).forEach(opt => {
-          const o = document.createElement('option');
-          o.value = opt; o.textContent = opt;
-          if (opt === originalValues[name]) o.selected = true;
-          input.appendChild(o);
-        });
-      } else if (cfg.type === 'date') {
-        input = document.createElement('input');
-        input.type = 'date';
-        input.className = 'border rounded-lg px-2 py-1';
-        const v = originalValues[name];
-        const m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/) || v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-        if (m) input.value = (m[3] ? `${m[3]}-${m[2]}-${m[1]}` : v);
-        else input.value = v;
-      } else {
-        input = document.createElement('input');
-        input.type = 'text';
-        input.className = 'border rounded-lg px-2 py-1';
-        input.value = originalValues[name];
-      }
-      input.dataset.bind = name;
-      span.replaceWith(input);
-      input.id = cfg.elId;
-    }
-
-    const btnEdit = document.getElementById('btnEditarDetalhes');
-    btnEdit.textContent = 'Salvar';
-    btnEdit.classList.remove('text-blue-700');
-    btnEdit.classList.add('bg-blue-600','text-white','hover:bg-blue-700','px-4','rounded-full');
-    btnEdit.onclick = saveChanges;
-
-    let btnCancel = document.getElementById('btnCancelarEdicao');
-    if (!btnCancel) {
-      btnCancel = document.createElement('button');
-      btnCancel.id = 'btnCancelarEdicao';
-      btnCancel.type = 'button';
-      btnCancel.className = 'rounded-full px-4 py-1.5 border border-slate-300 text-slate-700 hover:bg-slate-50 ml-2';
-      btnCancel.textContent = 'Cancelar';
-      document.querySelector('#modalDetalhes .border-b .flex.items-center.gap-2').insertBefore(
-        btnCancel,
-        document.querySelector('[data-close-detalhes]')
-      );
-    }
-    btnCancel.onclick = () => leaveEditMode(false);
-  }
-
-  function leaveEditMode(resetSpans) {
-    const btnEdit = document.getElementById('btnEditarDetalhes');
-    btnEdit.textContent = 'Editar';
-    btnEdit.className   = 'rounded-lg px-3 py-1.5 text-blue-700 hover:bg-blue-50';
-    btnEdit.onclick     = enterEditMode;
-    document.getElementById('btnCancelarEdicao')?.remove();
-
-    if (!isEditing) return;
-    isEditing = false;
-
-    if (!resetSpans) {
-      for (const [name, cfg] of Object.entries(FIELD_MAP)) {
-        const input = document.getElementById(cfg.elId);
-        const span  = document.createElement('span');
-        span.id = cfg.elId;
-        span.textContent = originalValues[name] || '—';
-        input.replaceWith(span);
-      }
-    }
-  }
-
-  async function saveChanges() {
-    const payload = { id_iniciativa: currentId };
-    for (const [name, cfg] of Object.entries(FIELD_MAP)) {
-      const el = document.getElementById(cfg.elId);
-      let val = (el.value ?? '').trim();
-      if (cfg.type === 'date' && val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)) {
-        const [,d,m,y] = val.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-        val = `${y}-${m}-${d}`;
-      }
-      payload[name] = val;
-    }
-
-    try {
-      const resp = await fetch('atualizar_iniciativa.php', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload)
-      });
-      const data = await resp.json();
-      if (!resp.ok || !data.ok) throw new Error(data.error || 'Falha ao salvar');
-
-      for (const [name, cfg] of Object.entries(FIELD_MAP)) {
-        const el = document.getElementById(cfg.elId);
-        const span = document.createElement('span');
-        span.id = cfg.elId;
-        span.textContent = payload[name] || '—';
-        el.replaceWith(span);
-      }
-      leaveEditMode(true);
-      toast('Alterações salvas!', 'ok');
-    } catch (e) {
-      toast('Não foi possível salvar. ' + e.message, 'err');
-    }
-  }
-
+  // Opcional: marcar como concluída (pode manter igual à sua lógica)
   async function markDone() {
+    if (!currentId) return;
     try {
       const resp = await fetch('marcar_concluida.php', {
         method: 'POST',
@@ -784,30 +704,25 @@ function toast(msg, type='ok') {
         const btn = document.getElementById('btnConcluida');
         btn.innerHTML = '<span>✅</span> <span>Concluído</span>';
       }
-    } catch(e) {}
+    } catch(e) {
+      // se quiser, pode exibir toast aqui
+    }
   }
 
-  function toast(msg, type='ok') {
-    const t = document.createElement('div');
-    t.textContent = msg;
-    t.className = 'fixed top-4 right-4 z-[60] px-4 py-2 rounded-lg shadow ' +
-                  (type==='ok' ? 'bg-green-600 text-white' : 'bg-red-600 text-white');
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 2500);
-  }
-
+  // Quando clicar em um card → abre o modal
   document.getElementById('cardsIniciativas')?.addEventListener('click', (ev) => {
     const card = ev.target.closest('article[data-id]');
     if (card) openWith(card);
   });
 
+  // Fechar modal (backdrop ou botão Fechar ×)
   modal?.addEventListener('click', (ev) => {
-    if (ev.target.hasAttribute('data-close-detalhes') || ev.target.closest('[data-close-detalhes]')) {
+    const isClose = ev.target.hasAttribute('data-close-detalhes') ||
+                    ev.target.closest?.('[data-close-detalhes]');
+    if (isClose) {
       modal.classList.add('hidden');
     }
   });
-
-  document.getElementById('btnEditarDetalhes')?.addEventListener('click', enterEditMode);
 })();
 
 /* ===== Fechar modal: Criar Iniciativa ===== */
@@ -830,22 +745,6 @@ function toast(msg, type='ok') {
     if (e.key === 'Escape') modal?.classList.add('hidden');
   });
 })();
-
-document.addEventListener('DOMContentLoaded', () => {
-  const url = new URL(window.location.href);
-  const open = url.searchParams.get('open');
-  const id   = url.searchParams.get('id_iniciativa');
-
-  if (open === 'detalhes' && id) {
-    window.openDetalhesById(id);
-
-    // opcional: limpa a URL pra não reabrir no F5
-    url.searchParams.delete('open');
-    url.searchParams.delete('id_iniciativa');
-    history.replaceState({}, '', url.toString());
-  }
-});
-
 
 
 </script>

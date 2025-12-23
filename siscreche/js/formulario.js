@@ -1,7 +1,9 @@
-document.querySelector('form.formulario').addEventListener('submit', function () {
-  const p = (document.getElementById('numero_contrato_prefixo').value || '').padStart(3, '0');
-  const a = document.getElementById('numero_contrato_ano').value || '';
-  document.getElementById('numero_contrato').value = `${p}/${a}`;
+document.querySelector('form').addEventListener('submit', function(e) {
+  const prefixo = document.getElementById('numero_contrato_prefixo').value.padStart(3, '0');
+  const ano = document.getElementById('numero_contrato_ano').value;
+  document.getElementById('numero_contrato').value = `${prefixo}/${ano}`;
+
+  const nomeIniciativa = document.querySelector('input[name="iniciativa"]').value;
 });
 
   const execucaoInput = document.querySelector('input[name="ib_execucao"]');
@@ -28,7 +30,7 @@ document.querySelector('form.formulario').addEventListener('submit', function ()
     if (temCamposPreenchidos()) {
       document.getElementById('modal-cancelar').classList.remove('hidden');
     } else {
-      window.location.href = '../index.php?page=home';
+      window.location.href = 'index.php?page=home';
     }
   }
 
@@ -40,41 +42,26 @@ document.querySelector('form.formulario').addEventListener('submit', function ()
   }
 
 document.getElementById('btn-sim').addEventListener('click', function() {
-    window.location.href = '../index.php?page=home';
+    window.location.href = 'index.php?page=home';
 });
 
 document.getElementById('btn-nao').addEventListener('click', function() {
   document.getElementById('modal-cancelar').classList.add('hidden');
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-  const form  = document.querySelector('form.formulario');
-  if (!form) return;
-
-  const pref   = document.getElementById('numero_contrato_prefixo');
-  const ano    = document.getElementById('numero_contrato_ano');
-  const hidden = document.getElementById('numero_contrato');
-
-  function syncContrato() {
-    const p = (pref?.value || '').replace(/\D+/g, '').padStart(3, '0'); 
-    const a = (ano?.value  || '').replace(/\D+/g, '');
-    hidden.value = (p && a.length === 4) ? `${p}/${a}` : '';
-  }
-
-  // mantém sincronizado enquanto digita
-  pref?.addEventListener('input', syncContrato);
-  ano ?.addEventListener('input', syncContrato);
-
-  // garante antes de enviar
-  form.addEventListener('submit', () => {
-    syncContrato();
-    // (opcional) validação
-    if (!hidden.value.match(/^\d{3}\/\d{4}$/)) {
-      // Se quiser bloquear quando estiver inválido, descomente:
-      // event.preventDefault();
-      // alert('Preencha o nº do contrato no formato 000/2025');
+document.addEventListener('DOMContentLoaded', function () {
+  const nomeCriada = localStorage.getItem('iniciativaCriada');
+  if (nomeCriada) {
+    const modal = document.getElementById('modal');
+    const message = document.getElementById('modal-message');
+    
+    if (modal && message) {
+      message.innerText = `Iniciativa "${nomeCriada}" criada com sucesso!`;
+      modal.classList.remove('hidden');
     }
-  });
+
+    localStorage.removeItem('iniciativaCriada');
+  }
 });
 
 execucaoInput.addEventListener('input', calcularVariacao);

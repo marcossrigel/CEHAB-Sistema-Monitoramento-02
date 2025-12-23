@@ -1,4 +1,4 @@
-// ---- Auto-grow para textareas já presentes ----
+
 document.querySelectorAll('.obs').forEach(autoGrow);
 
 function autoGrow(textarea) {
@@ -10,7 +10,6 @@ function autoGrow(textarea) {
   grow.call(textarea);
 }
 
-// ---- Cria a célula de ações (+ / -) ----
 function criarCelulaAcoes(tr, id = null) {
   const td = tr.insertCell();
   td.className = 'celula-acoes';
